@@ -371,7 +371,11 @@ function App({
   gradientStops = [0.6, 0.65, 0.75, 0.8],
   gradientRadius = 1.35,
   autoRotate = true,
-  enableVerticalRotation = true
+  enableVerticalRotation = true,
+  blur = 24,
+  focus = 8.7,
+  fov = 35,
+  cameraZ = 7.6
 }) {
   // Device detection
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
@@ -392,8 +396,8 @@ function App({
 
   // Update camera position
   useEffect(() => {
-    camera.position.set(0, 0, 7.6)
-  }, [camera])
+    camera.position.set(0, 0, cameraZ)
+  }, [cameraZ, camera])
 
   return (
     <>
@@ -413,9 +417,9 @@ function App({
       <Particles
         frequency={frequency}
         speedFactor={speedFactor}
-        fov={35}
-        blur={24}
-        focus={8.7}
+        fov={fov}
+        blur={blur}
+        focus={focus}
         position={[0, 0, 0]}
         size={actualSize}
         gradientColors={gradientColors}
@@ -433,12 +437,16 @@ export default function ParticleSystem({
   backgroundColor = '#000000',
   frequency = 0.15,
   speedFactor = 4,
-  rotationSpeed = 3.3,
+  rotationSpeed = 0.3,
   gradientColors = ['#F0F4FF', '#637AFF', '#372CD5', '#F0F4FF'],
   gradientStops = [0.6, 0.65, 0.75, 0.8],
   gradientRadius = 1.35,
   autoRotate = true,
   enableVerticalRotation,
+  blur = 24,
+  focus = 8.7,
+  fov = 35,
+  cameraZ = 7.6,
   style = {},
   ...props 
 }) {
@@ -450,8 +458,8 @@ export default function ParticleSystem({
     <div style={{ width, height, ...style }} {...props}>
       <Canvas
         camera={{
-          fov: 35,
-          position: [0, 0, 7.6]
+          fov: fov,
+          position: [0, 0, cameraZ]
         }}
         gl={{
           alpha: true,
@@ -477,6 +485,10 @@ export default function ParticleSystem({
           gradientRadius={gradientRadius}
           autoRotate={autoRotate}
           enableVerticalRotation={finalEnableVerticalRotation}
+          blur={blur}
+          focus={focus}
+          fov={fov}
+          cameraZ={cameraZ}
         />
       </Canvas>
     </div>

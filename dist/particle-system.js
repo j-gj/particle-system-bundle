@@ -38105,7 +38105,7 @@ function nB({
     ),
     /* @__PURE__ */ Mn.jsxs("points", { ...y, children: [
       /* @__PURE__ */ Mn.jsx("bufferGeometry", { children: /* @__PURE__ */ Mn.jsx("bufferAttribute", { attach: "attributes-position", count: R.length / 3, array: R, itemSize: 3 }) }),
-      /* @__PURE__ */ Mn.jsx("depthOfFieldMaterial", { ref: M, args: [finalBlendMode, v] })
+      /* @__PURE__ */ Mn.jsx("depthOfFieldMaterial", { ref: M, args: [p, v] })
     ] })
   ] });
 }
@@ -38122,18 +38122,19 @@ function iB({
   focus: p = 8.7,
   fov: v = 35,
   cameraZ: y = 7.6,
-  blendMode: x = "additive"
+  blendMode: x = "normal",
+  isLightBackground: M = !1
 }) {
-  const M = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent), E = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? M ? 128 : 256 : M ? 128 : 300, { camera: L } = gs(), R = ys();
-  return rM((U, F) => {
-    R.current && R.current.update && R.current.update(F);
+  const T = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent), L = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? T ? 128 : 256 : T ? 128 : 300, { camera: R } = gs(), U = ys();
+  return rM((F, z) => {
+    U.current && U.current.update && U.current.update(z);
   }), fc(() => {
-    L.position.set(0, 0, y);
-  }, [y, L]), /* @__PURE__ */ Mn.jsxs(Mn.Fragment, { children: [
+    R.position.set(0, 0, y);
+  }, [y, R]), /* @__PURE__ */ Mn.jsxs(Mn.Fragment, { children: [
     /* @__PURE__ */ Mn.jsx(
       qz,
       {
-        ref: R,
+        ref: U,
         makeDefault: !0,
         autoRotate: c,
         autoRotateSpeed: t,
@@ -38155,12 +38156,12 @@ function iB({
         blur: h,
         focus: p,
         position: [0, 0, 0],
-        size: E,
+        size: L,
         gradientColors: n,
         gradientStops: r,
         gradientRadius: o,
-        blendMode: finalBlendMode,
-        isLightBackground
+        blendMode: x,
+        isLightBackground: M
       }
     )
   ] });
@@ -38190,16 +38191,12 @@ function uB({
   focus: U = 8.7,
   fov: F = 35,
   cameraZ: z = 7.6,
-  blendMode: B = "auto",
+  blendMode: B = "normal",
   // 'normal', 'additive', or 'auto'
   style: W = {},
   ...O
 }) {
-  const I = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent), Z = L !== void 0 ? L : !I;
-  t && Zz(t);
-  let ie = B;
-  B === "auto" && (ie = "normal");
-  const fe = f ? [
+  const I = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent), Z = L !== void 0 ? L : !I, ie = Zz(t), fe = f ? [
     f,
     h || c[1],
     p || c[2],
@@ -38246,7 +38243,8 @@ function uB({
           focus: U,
           fov: F,
           cameraZ: z,
-          blendMode: ie
+          blendMode: B,
+          isLightBackground: ie
         }
       )
     }

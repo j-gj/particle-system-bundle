@@ -5,32 +5,32 @@ import * as THREE from 'three'
 
 // Utility functions
 function hexToRgb(hex) {
-  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-  return result ? {
-    r: parseInt(result[1], 16) / 255,
-    g: parseInt(result[2], 16) / 255,
-    b: parseInt(result[3], 16) / 255
-  } : null;
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16) / 255,
+        g: parseInt(result[2], 16) / 255,
+        b: parseInt(result[3], 16) / 255
+    } : null;
 }
 
 function isLightColor(color) {
-  const rgb = hexToRgb(color);
-  if (!rgb) return false;
-  
-  // Calculate relative luminance
-  const luminance = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
-  return luminance > 0.5; // Light if luminance > 50%
+    const rgb = hexToRgb(color);
+    if (!rgb) return false;
+
+    // Calculate relative luminance
+    const luminance = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
+    return luminance > 0.5; // Light if luminance > 50%
 }
 
 function getRandomSphere(count, size) {
-  const data = new Float32Array(count * 4)
-  for (let i = 0; i < count * 4; i += 4) {
-    data[i] = (Math.random() - 0.5) * 4
-    data[i + 1] = (Math.random() - 0.5) * 4
-    data[i + 2] = (Math.random() - 0.5) * 4
-    data[i + 3] = 1
-  }
-  return data
+    const data = new Float32Array(count * 4)
+    for (let i = 0; i < count * 4; i += 4) {
+        data[i] = (Math.random() - 0.5) * 4
+        data[i + 1] = (Math.random() - 0.5) * 4
+        data[i + 2] = (Math.random() - 0.5) * 4
+        data[i + 3] = 1
+    }
+    return data
 }
 
 // Shader noise functions
@@ -116,23 +116,23 @@ vec3 curlNoise(vec3 p) {
 
 // Simulation Material
 class SimulationMaterial extends THREE.ShaderMaterial {
-  constructor(size = 512) {
-    const positionsTexture = new THREE.DataTexture(
-      getRandomSphere(size * size, 1),
-      size,
-      size,
-      THREE.RGBAFormat,
-      THREE.FloatType
-    )
-    positionsTexture.needsUpdate = true
+    constructor(size = 512) {
+        const positionsTexture = new THREE.DataTexture(
+            getRandomSphere(size * size, 1),
+            size,
+            size,
+            THREE.RGBAFormat,
+            THREE.FloatType
+        )
+        positionsTexture.needsUpdate = true
 
-    super({
-      uniforms: {
-        positions: { value: positionsTexture },
-        uFrequency: { value: 0.25 },
-        uTime: { value: 0 }
-      },
-      vertexShader: `
+        super({
+            uniforms: {
+                positions: { value: positionsTexture },
+                uFrequency: { value: 0.25 },
+                uTime: { value: 0 }
+            },
+            vertexShader: `
         precision mediump float;
         varying vec2 vUv;
         void main() {
@@ -140,7 +140,7 @@ class SimulationMaterial extends THREE.ShaderMaterial {
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
       `,
-      fragmentShader: `
+            fragmentShader: `
         precision mediump float;
         precision mediump sampler2D;
         uniform float uTime;
@@ -166,29 +166,29 @@ class SimulationMaterial extends THREE.ShaderMaterial {
           gl_FragColor = vec4(mix(pos, curlPos, snoise(pos + time) * 0.5 + 0.5), 1.0);
         }
       `
-    })
-  }
+        })
+    }
 }
 
 // Depth of Field Material
 class DepthOfFieldMaterial extends THREE.ShaderMaterial {
-  constructor(blendMode = 'normal', isLightBackground = false) {
-    const blending = blendMode === 'additive' ? THREE.AdditiveBlending : THREE.NormalBlending;
-    
-    super({
-      uniforms: {
-        positions: { value: null },
-        pointSize: { value: 3 },
-        uTime: { value: 0 },
-        uFocus: { value: 4 },
-        uFov: { value: 45 },
-        uBlur: { value: 30 },
-        uGradientColors: { value: new Float32Array([1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1]) },
-        uGradientStops: { value: new Float32Array([0.0, 0.3, 0.7, 1.0]) },
-        uGradientRadius: { value: 2.0 },
-        uIsLightBackground: { value: isLightBackground ? 1.0 : 0.0 }
-      },
-      vertexShader: `
+    constructor(blendMode = 'normal', isLightBackground = false) {
+        const blending = blendMode === 'additive' ? THREE.AdditiveBlending : THREE.NormalBlending;
+
+        super({
+            uniforms: {
+                positions: { value: null },
+                pointSize: { value: 3 },
+                uTime: { value: 0 },
+                uFocus: { value: 4 },
+                uFov: { value: 45 },
+                uBlur: { value: 30 },
+                uGradientColors: { value: new Float32Array([1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1]) },
+                uGradientStops: { value: new Float32Array([0.0, 0.3, 0.7, 1.0]) },
+                uGradientRadius: { value: 2.0 },
+                uIsLightBackground: { value: isLightBackground ? 1.0 : 0.0 }
+            },
+            vertexShader: `
         precision mediump float;
         uniform sampler2D positions;
         uniform float pointSize;
@@ -215,7 +215,7 @@ class DepthOfFieldMaterial extends THREE.ShaderMaterial {
           gl_PointSize = sizeFactor * vDistance * uBlur;
         }
       `,
-      fragmentShader: `
+            fragmentShader: `
         precision mediump float;
         varying float vDistance;
         varying float vGradientDistance;
@@ -253,307 +253,301 @@ class DepthOfFieldMaterial extends THREE.ShaderMaterial {
           gl_FragColor = vec4(gradientColor, alpha);
         }
       `,
-      transparent: true,
-      blending: blending,
-      depthWrite: false
-    })
-  }
+            transparent: true,
+            blending: blending,
+            depthWrite: false
+        })
+    }
 }
 
 // Extend materials
 extend({ SimulationMaterial, DepthOfFieldMaterial })
 
 // Particles Component
-function Particles({ 
-  frequency = 0.15,
-  speedFactor = 4, 
-  fov = 35, 
-  blur = 24, 
-  focus = 8.7,
-  size = 256,
-  gradientColors = ['#F0F4FF', '#637AFF', '#372CD5', '#F0F4FF'],
-  gradientStops = [0.6, 0.65, 0.75, 0.8],
-  gradientRadius = 1.35,
-  blendMode = 'normal',
-  isLightBackground = false,
-  ...props 
+function Particles({
+    frequency = 0.15,
+    speedFactor = 4,
+    fov = 35,
+    blur = 24,
+    focus = 8.7,
+    size = 256,
+    gradientColors = ['#F0F4FF', '#637AFF', '#372CD5', '#F0F4FF'],
+    gradientStops = [0.6, 0.65, 0.75, 0.8],
+    gradientRadius = 1.35,
+    blendMode = 'normal',
+    isLightBackground = false,
+    ...props
 }) {
-  const simRef = useRef()
-  const renderRef = useRef()
-  
-  // Set up FBO scene
-  const [scene] = useState(() => new THREE.Scene())
-  const [camera] = useState(() => new THREE.OrthographicCamera(-1, 1, 1, -1, 1 / Math.pow(2, 53), 1))
-  const [positions] = useState(() => new Float32Array([-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0]))
-  const [uvs] = useState(() => new Float32Array([0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0]))
-  
-  const target = useFBO(size, size, {
-    minFilter: THREE.NearestFilter,
-    magFilter: THREE.NearestFilter,
-    format: THREE.RGBAFormat,
-    stencilBuffer: false,
-    type: THREE.FloatType
-  })
-  
-  // Generate particle positions as UV coordinates
-  const particles = useMemo(() => {
-    const length = size * size
-    const particles = new Float32Array(length * 3)
-    
-    for (let i = 0; i < length; i++) {
-      const i3 = i * 3
-      particles[i3 + 0] = (i % size) / size
-      particles[i3 + 1] = Math.floor(i / size) / size  
-      particles[i3 + 2] = 0
-    }
+    const simRef = useRef()
+    const renderRef = useRef()
 
-    return particles
-  }, [size])
-  
-  // Convert gradient colors to uniform format
-  const gradientData = useMemo(() => {
-    const colors = gradientColors.map(color => {
-      const rgb = hexToRgb(color);
-      return [rgb.r, rgb.g, rgb.b];
-    });
-    
-    return {
-      colors: new Float32Array(colors.flat()),
-      stops: new Float32Array(gradientStops)
-    };
-  }, [gradientColors, gradientStops]);
-  
-  // Update simulation every frame
-  useFrame(({ gl, clock }) => {
-    if (!simRef.current || !renderRef.current) return
-    
-    // Render simulation to FBO
-    gl.setRenderTarget(target)
-    gl.clear()
-    gl.render(scene, camera)
-    gl.setRenderTarget(null)
-    
-    // Update render material with type assertion
-    const renderMaterial = renderRef.current
-    if (renderMaterial && renderMaterial.uniforms) {
-      renderMaterial.uniforms.positions.value = target.texture
-      renderMaterial.uniforms.uFocus.value = focus
-      renderMaterial.uniforms.uFov.value = fov
-      renderMaterial.uniforms.uBlur.value = blur
-      renderMaterial.uniforms.uGradientColors.value = gradientData.colors
-      renderMaterial.uniforms.uGradientStops.value = gradientData.stops
-      renderMaterial.uniforms.uGradientRadius.value = gradientRadius
-      renderMaterial.uniforms.uTime.value = clock.elapsedTime
-    }
-    
-    // Update simulation material with type assertion
-    const simMaterial = simRef.current
-    if (simMaterial && simMaterial.uniforms) {
-      simMaterial.uniforms.uTime.value = clock.elapsedTime * speedFactor
-      simMaterial.uniforms.uFrequency.value = THREE.MathUtils.lerp(
-        simMaterial.uniforms.uFrequency.value, 
-        frequency, 
-        0.1
-      )
-    }
-  })
-  
-  return (
-    <>
-      {/* Simulation mesh rendered to FBO */}
-      {createPortal(
-        <mesh>
-          <simulationMaterial ref={simRef} args={[size]} />
-          <bufferGeometry>
-            <bufferAttribute attach="attributes-position" count={positions.length / 3} array={positions} itemSize={3} />
-            <bufferAttribute attach="attributes-uv" count={uvs.length / 2} array={uvs} itemSize={2} />
-          </bufferGeometry>
-        </mesh>,
-        scene
-      )}
-      
-      {/* Points using FBO texture for positions */}
-      <points {...props}>
-        <bufferGeometry>
-          <bufferAttribute attach="attributes-position" count={particles.length / 3} array={particles} itemSize={3} />
-        </bufferGeometry>
-        <depthOfFieldMaterial ref={renderRef} args={[finalBlendMode, isLightBackground]} />
-      </points>
-    </>
-  )
+    // Set up FBO scene
+    const [scene] = useState(() => new THREE.Scene())
+    const [camera] = useState(() => new THREE.OrthographicCamera(-1, 1, 1, -1, 1 / Math.pow(2, 53), 1))
+    const [positions] = useState(() => new Float32Array([-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0]))
+    const [uvs] = useState(() => new Float32Array([0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0]))
+
+    const target = useFBO(size, size, {
+        minFilter: THREE.NearestFilter,
+        magFilter: THREE.NearestFilter,
+        format: THREE.RGBAFormat,
+        stencilBuffer: false,
+        type: THREE.FloatType
+    })
+
+    // Generate particle positions as UV coordinates
+    const particles = useMemo(() => {
+        const length = size * size
+        const particles = new Float32Array(length * 3)
+
+        for (let i = 0; i < length; i++) {
+            const i3 = i * 3
+            particles[i3 + 0] = (i % size) / size
+            particles[i3 + 1] = Math.floor(i / size) / size
+            particles[i3 + 2] = 0
+        }
+
+        return particles
+    }, [size])
+
+    // Convert gradient colors to uniform format
+    const gradientData = useMemo(() => {
+        const colors = gradientColors.map(color => {
+            const rgb = hexToRgb(color);
+            return [rgb.r, rgb.g, rgb.b];
+        });
+
+        return {
+            colors: new Float32Array(colors.flat()),
+            stops: new Float32Array(gradientStops)
+        };
+    }, [gradientColors, gradientStops]);
+
+    // Update simulation every frame
+    useFrame(({ gl, clock }) => {
+        if (!simRef.current || !renderRef.current) return
+
+        // Render simulation to FBO
+        gl.setRenderTarget(target)
+        gl.clear()
+        gl.render(scene, camera)
+        gl.setRenderTarget(null)
+
+        // Update render material with type assertion
+        const renderMaterial = renderRef.current
+        if (renderMaterial && renderMaterial.uniforms) {
+            renderMaterial.uniforms.positions.value = target.texture
+            renderMaterial.uniforms.uFocus.value = focus
+            renderMaterial.uniforms.uFov.value = fov
+            renderMaterial.uniforms.uBlur.value = blur
+            renderMaterial.uniforms.uGradientColors.value = gradientData.colors
+            renderMaterial.uniforms.uGradientStops.value = gradientData.stops
+            renderMaterial.uniforms.uGradientRadius.value = gradientRadius
+            renderMaterial.uniforms.uTime.value = clock.elapsedTime
+        }
+
+        // Update simulation material with type assertion
+        const simMaterial = simRef.current
+        if (simMaterial && simMaterial.uniforms) {
+            simMaterial.uniforms.uTime.value = clock.elapsedTime * speedFactor
+            simMaterial.uniforms.uFrequency.value = THREE.MathUtils.lerp(
+                simMaterial.uniforms.uFrequency.value,
+                frequency,
+                0.1
+            )
+        }
+    })
+
+    return (
+        <>
+            {/* Simulation mesh rendered to FBO */}
+            {createPortal(
+                <mesh>
+                    <simulationMaterial ref={simRef} args={[size]} />
+                    <bufferGeometry>
+                        <bufferAttribute attach="attributes-position" count={positions.length / 3} array={positions} itemSize={3} />
+                        <bufferAttribute attach="attributes-uv" count={uvs.length / 2} array={uvs} itemSize={2} />
+                    </bufferGeometry>
+                </mesh>,
+                scene
+            )}
+
+            {/* Points using FBO texture for positions */}
+            <points {...props}>
+                <bufferGeometry>
+                    <bufferAttribute attach="attributes-position" count={particles.length / 3} array={particles} itemSize={3} />
+                </bufferGeometry>
+                <depthOfFieldMaterial ref={renderRef} args={[blendMode, isLightBackground]} />
+            </points>
+        </>
+    )
 }
 
 // Internal App Component
 function App({
-  frequency = 0.15,
-  speedFactor = 4,
-  rotationSpeed = 3.3,
-  gradientColors = ['#F0F4FF', '#637AFF', '#372CD5', '#F0F4FF'],
-  gradientStops = [0.6, 0.65, 0.75, 0.8],
-  gradientRadius = 1.35,
-  autoRotate = true,
-  enableVerticalRotation = true,
-  blur = 24,
-  focus = 8.7,
-  fov = 35,
-  cameraZ = 7.6,
-  blendMode = 'additive'
+    frequency = 0.15,
+    speedFactor = 4,
+    rotationSpeed = 3.3,
+    gradientColors = ['#F0F4FF', '#637AFF', '#372CD5', '#F0F4FF'],
+    gradientStops = [0.6, 0.65, 0.75, 0.8],
+    gradientRadius = 1.35,
+    autoRotate = true,
+    enableVerticalRotation = true,
+    blur = 24,
+    focus = 8.7,
+    fov = 35,
+    cameraZ = 7.6,
+    blendMode = 'normal',
+    isLightBackground = false
 }) {
-  // Device detection
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  const safariSizes = isMobile ? 128 : 256
-  const otherBrowserSizes = isMobile ? 128 : 300
-  const actualSize = isSafari ? safariSizes : otherBrowserSizes
+    // Device detection
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const safariSizes = isMobile ? 128 : 256
+    const otherBrowserSizes = isMobile ? 128 : 300
+    const actualSize = isSafari ? safariSizes : otherBrowserSizes
 
-  const { camera } = useThree()
-  const controlsRef = useRef()
+    const { camera } = useThree()
+    const controlsRef = useRef()
 
-  // Use useFrame to update controls
-  useFrame((state, delta) => {
-    if (controlsRef.current && controlsRef.current.update) {
-      controlsRef.current.update(delta)
-    }
-  })
+    // Use useFrame to update controls
+    useFrame((state, delta) => {
+        if (controlsRef.current && controlsRef.current.update) {
+            controlsRef.current.update(delta)
+        }
+    })
 
-  // Update camera position
-  useEffect(() => {
-    camera.position.set(0, 0, cameraZ)
-  }, [cameraZ, camera])
+    // Update camera position
+    useEffect(() => {
+        camera.position.set(0, 0, cameraZ)
+    }, [cameraZ, camera])
 
-  return (
-    <>
-      <OrbitControls
-        ref={controlsRef}
-        makeDefault
-        autoRotate={autoRotate}
-        autoRotateSpeed={rotationSpeed}
-        enableZoom={false}
-        enableDamping={true}
-        dampingFactor={0.05}
-        enableRotate={true}
-        minPolarAngle={enableVerticalRotation ? 0 : Math.PI / 2}
-        maxPolarAngle={enableVerticalRotation ? Math.PI : Math.PI / 2}
-      />
-      <ambientLight />
-      <Particles
-        frequency={frequency}
-        speedFactor={speedFactor}
-        fov={fov}
-        blur={blur}
-        focus={focus}
-        position={[0, 0, 0]}
-        size={actualSize}
-        gradientColors={gradientColors}
-        gradientStops={gradientStops}
-        gradientRadius={gradientRadius}
-        blendMode={finalBlendMode}
-        isLightBackground={isLightBackground}
-      />
-    </>
-  )
+    return (
+        <>
+            <OrbitControls
+                ref={controlsRef}
+                makeDefault
+                autoRotate={autoRotate}
+                autoRotateSpeed={rotationSpeed}
+                enableZoom={false}
+                enableDamping={true}
+                dampingFactor={0.05}
+                enableRotate={true}
+                minPolarAngle={enableVerticalRotation ? 0 : Math.PI / 2}
+                maxPolarAngle={enableVerticalRotation ? Math.PI : Math.PI / 2}
+            />
+            <ambientLight />
+            <Particles
+                frequency={frequency}
+                speedFactor={speedFactor}
+                fov={fov}
+                blur={blur}
+                focus={focus}
+                position={[0, 0, 0]}
+                size={actualSize}
+                gradientColors={gradientColors}
+                gradientStops={gradientStops}
+                gradientRadius={gradientRadius}
+                blendMode={blendMode}
+                isLightBackground={isLightBackground}
+            />
+        </>
+    )
 }
 
 // Main Export for CDN Usage
-export default function ParticleSystem({ 
-  width = "100%", 
-  height = "100%",
-  backgroundColor = '#000000',
-  frequency = 0.15,
-  speedFactor = 4,
-  rotationSpeed = 3.3,
-  
-  // Accept either format
-  gradientColors = ['#F0F4FF', '#637AFF', '#372CD5', '#F0F4FF'],
-  gradientColor1,
-  gradientColor2,
-  gradientColor3,
-  gradientColor4,
-  
-  gradientStops = [0.6, 0.65, 0.75, 0.8],
-  gradientStop1,
-  gradientStop2,
-  gradientStop3,
-  gradientStop4,
-  
-  gradientRadius = 1.35,
-  autoRotate = true,
-  enableVerticalRotation,
-  blur = 24,
-  focus = 8.7,
-  fov = 35,
-  cameraZ = 7.6,
-  blendMode = 'auto', // 'normal', 'additive', or 'auto'
-  style = {},
-  ...props 
-}) {
-  // Auto-detect vertical rotation based on device if not explicitly set
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  const finalEnableVerticalRotation = enableVerticalRotation !== undefined ? enableVerticalRotation : !isMobile
+export default function ParticleSystem({
+    width = "100%",
+    height = "100%",
+    backgroundColor = '#000000',
+    frequency = 0.15,
+    speedFactor = 4,
+    rotationSpeed = 3.3,
 
-  // Auto-detect best blend mode based on background
-  const isLightBackground = backgroundColor && isLightColor(backgroundColor)
-  let finalBlendMode = blendMode
-  if (blendMode === 'auto') {
-    // For light backgrounds, we need to make particles more opaque/darker
-    // For dark backgrounds, normal blending works great
-    finalBlendMode = 'normal'  // Use normal for both, but we'll adjust colors instead
-  }
-
-  // Transform individual color props if they exist, otherwise use gradientColors
-  const finalGradientColors = gradientColor1 ? [
+    // Accept either format
+    gradientColors = ['#F0F4FF', '#637AFF', '#372CD5', '#F0F4FF'],
     gradientColor1,
-    gradientColor2 || gradientColors[1],
-    gradientColor3 || gradientColors[2], 
-    gradientColor4 || gradientColors[3]
-  ] : gradientColors
+    gradientColor2,
+    gradientColor3,
+    gradientColor4,
 
-  // Transform individual stop props if they exist, otherwise use gradientStops
-  const finalGradientStops = gradientStop1 !== undefined ? [
+    gradientStops = [0.6, 0.65, 0.75, 0.8],
     gradientStop1,
-    gradientStop2 !== undefined ? gradientStop2 : gradientStops[1],
-    gradientStop3 !== undefined ? gradientStop3 : gradientStops[2],
-    gradientStop4 !== undefined ? gradientStop4 : gradientStops[3]
-  ] : gradientStops
+    gradientStop2,
+    gradientStop3,
+    gradientStop4,
 
-  return (
-    <div style={{ width, height, backgroundColor, ...style }} {...props}>
-      <Canvas
-        camera={{
-          fov: fov,
-          position: [0, 0, cameraZ]
-        }}
-        gl={{
-          alpha: true,
-          antialias: true,
-          powerPreference: "high-performance",
-          desynchronized: true,
-          premultipliedAlpha: false,
-          preserveDrawingBuffer: false,
-          failIfMajorPerformanceCaveat: false,
-          stencil: false,
-          depth: true
-        }}
-        resize={{ scroll: false }}
-        dpr={[1, 2]}
-        style={{ background: 'transparent' }}
-      >
-        <App 
-          frequency={frequency}
-          speedFactor={speedFactor}
-          rotationSpeed={rotationSpeed}
-          gradientColors={finalGradientColors}
-          gradientStops={finalGradientStops}
-          gradientRadius={gradientRadius}
-          autoRotate={autoRotate}
-          enableVerticalRotation={finalEnableVerticalRotation}
-          blur={blur}
-          focus={focus}
-          fov={fov}
-          cameraZ={cameraZ}
-          blendMode={finalBlendMode}
-        />
-      </Canvas>
-    </div>
-  )
+    gradientRadius = 1.35,
+    autoRotate = true,
+    enableVerticalRotation,
+    blur = 24,
+    focus = 8.7,
+    fov = 35,
+    cameraZ = 7.6,
+    blendMode = 'normal', // 'normal', 'additive', or 'auto'
+    style = {},
+    ...props
+}) {
+    // Auto-detect vertical rotation based on device if not explicitly set
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    const finalEnableVerticalRotation = enableVerticalRotation !== undefined ? enableVerticalRotation : !isMobile
+    const isLightBackground = isLightColor(backgroundColor)
+
+    // Transform individual color props if they exist, otherwise use gradientColors
+    const finalGradientColors = gradientColor1 ? [
+        gradientColor1,
+        gradientColor2 || gradientColors[1],
+        gradientColor3 || gradientColors[2],
+        gradientColor4 || gradientColors[3]
+    ] : gradientColors
+
+    // Transform individual stop props if they exist, otherwise use gradientStops
+    const finalGradientStops = gradientStop1 !== undefined ? [
+        gradientStop1,
+        gradientStop2 !== undefined ? gradientStop2 : gradientStops[1],
+        gradientStop3 !== undefined ? gradientStop3 : gradientStops[2],
+        gradientStop4 !== undefined ? gradientStop4 : gradientStops[3]
+    ] : gradientStops
+
+    return (
+        <div style={{ width, height, backgroundColor, ...style }} {...props}>
+            <Canvas
+                camera={{
+                    fov: fov,
+                    position: [0, 0, cameraZ]
+                }}
+                gl={{
+                    alpha: true,
+                    antialias: true,
+                    powerPreference: "high-performance",
+                    desynchronized: true,
+                    premultipliedAlpha: false,
+                    preserveDrawingBuffer: false,
+                    failIfMajorPerformanceCaveat: false,
+                    stencil: false,
+                    depth: true
+                }}
+                resize={{ scroll: false }}
+                dpr={[1, 2]}
+                style={{ background: 'transparent' }}
+            >
+                <App
+                    frequency={frequency}
+                    speedFactor={speedFactor}
+                    rotationSpeed={rotationSpeed}
+                    gradientColors={finalGradientColors}
+                    gradientStops={finalGradientStops}
+                    gradientRadius={gradientRadius}
+                    autoRotate={autoRotate}
+                    enableVerticalRotation={finalEnableVerticalRotation}
+                    blur={blur}
+                    focus={focus}
+                    fov={fov}
+                    cameraZ={cameraZ}
+                    blendMode={blendMode}
+                    isLightBackground={isLightBackground}
+                />
+            </Canvas>
+        </div>
+    )
 }

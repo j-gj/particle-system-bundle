@@ -3,7 +3,7 @@ import { Canvas, createPortal, useFrame, extend, useThree } from '@react-three/f
 import { OrbitControls, useFBO } from '@react-three/drei'
 import * as THREE from 'three'
 
-// Utility function
+// Utility functions
 function hexToRgb(hex) {
   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
   return result ? {
@@ -11,6 +11,15 @@ function hexToRgb(hex) {
     g: parseInt(result[2], 16) / 255,
     b: parseInt(result[3], 16) / 255
   } : null;
+}
+
+function isLightColor(color) {
+  const rgb = hexToRgb(color);
+  if (!rgb) return false;
+  
+  // Calculate relative luminance
+  const luminance = 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b;
+  return luminance > 0.5; // Light if luminance > 50%
 }
 
 function getRandomSphere(count, size) {
@@ -163,7 +172,9 @@ class SimulationMaterial extends THREE.ShaderMaterial {
 
 // Depth of Field Material
 class DepthOfFieldMaterial extends THREE.ShaderMaterial {
-  constructor() {
+  constructor(blendMode = 'normal', isLightBackground = false) {
+    const blending = blendMode === 'additive' ? THREE.AdditiveBlending : THREE.NormalBlending;
+    
     super({
       uniforms: {
         positions: { value: null },
@@ -174,7 +185,8 @@ class DepthOfFieldMaterial extends THREE.ShaderMaterial {
         uBlur: { value: 30 },
         uGradientColors: { value: new Float32Array([1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1]) },
         uGradientStops: { value: new Float32Array([0.0, 0.3, 0.7, 1.0]) },
-        uGradientRadius: { value: 2.0 }
+        uGradientRadius: { value: 2.0 },
+        uIsLightBackground: { value: isLightBackground ? 1.0 : 0.0 }
       },
       vertexShader: `
         precision mediump float;
@@ -211,6 +223,7 @@ class DepthOfFieldMaterial extends THREE.ShaderMaterial {
         uniform vec3 uGradientColors[4];
         uniform float uGradientStops[4];
         uniform float uTime;
+        uniform float uIsLightBackground;
 
         vec3 getGradientColor(float t) {
           t = clamp(t, 0.0, 1.0);
@@ -227,6 +240,12 @@ class DepthOfFieldMaterial extends THREE.ShaderMaterial {
           float mask = 1.0 - smoothstep(0.95, 1.0, r2);
 
           float alpha = (1.04 - clamp(vDistance, 0.0, 1.0)) * mask;
+          
+          // Make particles more opaque on light backgrounds
+          if (uIsLightBackground > 0.5) {
+            alpha *= 2.0; // Double opacity for light backgrounds
+            alpha = min(alpha, 1.0); // Clamp to max 1.0
+          }
 
           float timeOffset = sin(uTime * 0.5) * 0.1;
           vec3 gradientColor = getGradientColor(vGradientDistance + timeOffset);
@@ -235,7 +254,7 @@ class DepthOfFieldMaterial extends THREE.ShaderMaterial {
         }
       `,
       transparent: true,
-      blending: THREE.NormalBlending,
+      blending: blending,
       depthWrite: false
     })
   }
@@ -255,6 +274,8 @@ function Particles({
   gradientColors = ['#F0F4FF', '#637AFF', '#372CD5', '#F0F4FF'],
   gradientStops = [0.6, 0.65, 0.75, 0.8],
   gradientRadius = 1.35,
+  blendMode = 'normal',
+  isLightBackground = false,
   ...props 
 }) {
   const simRef = useRef()
@@ -356,7 +377,7 @@ function Particles({
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" count={particles.length / 3} array={particles} itemSize={3} />
         </bufferGeometry>
-        <depthOfFieldMaterial ref={renderRef} />
+        <depthOfFieldMaterial ref={renderRef} args={[finalBlendMode, isLightBackground]} />
       </points>
     </>
   )
@@ -375,7 +396,8 @@ function App({
   blur = 24,
   focus = 8.7,
   fov = 35,
-  cameraZ = 7.6
+  cameraZ = 7.6,
+  blendMode = 'additive'
 }) {
   // Device detection
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
@@ -425,6 +447,8 @@ function App({
         gradientColors={gradientColors}
         gradientStops={gradientStops}
         gradientRadius={gradientRadius}
+        blendMode={finalBlendMode}
+        isLightBackground={isLightBackground}
       />
     </>
   )
@@ -437,9 +461,21 @@ export default function ParticleSystem({
   backgroundColor = '#000000',
   frequency = 0.15,
   speedFactor = 4,
-  rotationSpeed = 0.3,
+  rotationSpeed = 3.3,
+  
+  // Accept either format
   gradientColors = ['#F0F4FF', '#637AFF', '#372CD5', '#F0F4FF'],
+  gradientColor1,
+  gradientColor2,
+  gradientColor3,
+  gradientColor4,
+  
   gradientStops = [0.6, 0.65, 0.75, 0.8],
+  gradientStop1,
+  gradientStop2,
+  gradientStop3,
+  gradientStop4,
+  
   gradientRadius = 1.35,
   autoRotate = true,
   enableVerticalRotation,
@@ -447,6 +483,7 @@ export default function ParticleSystem({
   focus = 8.7,
   fov = 35,
   cameraZ = 7.6,
+  blendMode = 'auto', // 'normal', 'additive', or 'auto'
   style = {},
   ...props 
 }) {
@@ -454,8 +491,33 @@ export default function ParticleSystem({
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
   const finalEnableVerticalRotation = enableVerticalRotation !== undefined ? enableVerticalRotation : !isMobile
 
+  // Auto-detect best blend mode based on background
+  const isLightBackground = backgroundColor && isLightColor(backgroundColor)
+  let finalBlendMode = blendMode
+  if (blendMode === 'auto') {
+    // For light backgrounds, we need to make particles more opaque/darker
+    // For dark backgrounds, normal blending works great
+    finalBlendMode = 'normal'  // Use normal for both, but we'll adjust colors instead
+  }
+
+  // Transform individual color props if they exist, otherwise use gradientColors
+  const finalGradientColors = gradientColor1 ? [
+    gradientColor1,
+    gradientColor2 || gradientColors[1],
+    gradientColor3 || gradientColors[2], 
+    gradientColor4 || gradientColors[3]
+  ] : gradientColors
+
+  // Transform individual stop props if they exist, otherwise use gradientStops
+  const finalGradientStops = gradientStop1 !== undefined ? [
+    gradientStop1,
+    gradientStop2 !== undefined ? gradientStop2 : gradientStops[1],
+    gradientStop3 !== undefined ? gradientStop3 : gradientStops[2],
+    gradientStop4 !== undefined ? gradientStop4 : gradientStops[3]
+  ] : gradientStops
+
   return (
-    <div style={{ width, height, ...style }} {...props}>
+    <div style={{ width, height, backgroundColor, ...style }} {...props}>
       <Canvas
         camera={{
           fov: fov,
@@ -474,14 +536,14 @@ export default function ParticleSystem({
         }}
         resize={{ scroll: false }}
         dpr={[1, 2]}
-        style={{ background: backgroundColor }}
+        style={{ background: 'transparent' }}
       >
         <App 
           frequency={frequency}
           speedFactor={speedFactor}
           rotationSpeed={rotationSpeed}
-          gradientColors={gradientColors}
-          gradientStops={gradientStops}
+          gradientColors={finalGradientColors}
+          gradientStops={finalGradientStops}
           gradientRadius={gradientRadius}
           autoRotate={autoRotate}
           enableVerticalRotation={finalEnableVerticalRotation}
@@ -489,6 +551,7 @@ export default function ParticleSystem({
           focus={focus}
           fov={fov}
           cameraZ={cameraZ}
+          blendMode={finalBlendMode}
         />
       </Canvas>
     </div>

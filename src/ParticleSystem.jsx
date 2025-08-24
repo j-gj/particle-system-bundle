@@ -1,0 +1,484 @@
+import React, { useMemo, useState, useRef, useEffect } from 'react'
+import { Canvas, createPortal, useFrame, extend, useThree } from '@react-three/fiber'
+import { OrbitControls, useFBO } from '@react-three/drei'
+import * as THREE from 'three'
+
+// Utility function
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16) / 255,
+    g: parseInt(result[2], 16) / 255,
+    b: parseInt(result[3], 16) / 255
+  } : null;
+}
+
+function getRandomSphere(count, size) {
+  const data = new Float32Array(count * 4)
+  for (let i = 0; i < count * 4; i += 4) {
+    data[i] = (Math.random() - 0.5) * 4
+    data[i + 1] = (Math.random() - 0.5) * 4
+    data[i + 2] = (Math.random() - 0.5) * 4
+    data[i + 3] = 1
+  }
+  return data
+}
+
+// Shader noise functions
+const simplexNoise = `
+  vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+  vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+  vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
+  vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
+
+  float snoise(vec3 v) {
+    const vec2 C = vec2(1.0/6.0, 1.0/3.0);
+    const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
+    vec3 i = floor(v + dot(v, C.yyy));
+    vec3 x0 = v - i + dot(i, C.xxx);
+    vec3 g = step(x0.yzx, x0.xyz);
+    vec3 l = 1.0 - g;
+    vec3 i1 = min(g.xyz, l.zxy);
+    vec3 i2 = max(g.xyz, l.zxy);
+    vec3 x1 = x0 - i1 + C.xxx;
+    vec3 x2 = x0 - i2 + C.yyy;
+    vec3 x3 = x0 - D.yyy;
+    i = mod289(i);
+    vec4 p = permute(permute(permute(i.z + vec4(0.0, i1.z, i2.z, 1.0)) + i.y + vec4(0.0, i1.y, i2.y, 1.0)) + i.x + vec4(0.0, i1.x, i2.x, 1.0));
+    float n_ = 0.142857142857;
+    vec3 ns = n_ * D.wyz - D.xzx;
+    vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
+    vec4 x_ = floor(j * ns.z);
+    vec4 y_ = floor(j - 7.0 * x_);
+    vec4 x = x_ * ns.x + ns.yyyy;
+    vec4 y = y_ * ns.x + ns.yyyy;
+    vec4 h = 1.0 - abs(x) - abs(y);
+    vec4 b0 = vec4(x.xy, y.xy);
+    vec4 b1 = vec4(x.zw, y.zw);
+    vec4 s0 = floor(b0)*2.0 + 1.0;
+    vec4 s1 = floor(b1)*2.0 + 1.0;
+    vec4 sh = -step(h, vec4(0.0));
+    vec4 a0 = b0.xzyw + s0.xzyw * sh.xxyy;
+    vec4 a1 = b1.xzyw + s1.xzyw * sh.zzww;
+    vec3 p0 = vec3(a0.xy, h.x);
+    vec3 p1 = vec3(a0.zw, h.y);
+    vec3 p2 = vec3(a1.xy, h.z);
+    vec3 p3 = vec3(a1.zw, h.w);
+    vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
+    p0 *= norm.x; p1 *= norm.y; p2 *= norm.z; p3 *= norm.w;
+    vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
+    m = m * m;
+    return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
+  }
+`
+
+const snoiseVec3 = `
+vec3 snoiseVec3(vec3 x) {
+  float s  = snoise(vec3( x ));
+  float s1 = snoise(vec3( x.y - 19.1 , x.z + 33.4 , x.x + 47.2 ));
+  float s2 = snoise(vec3( x.z + 74.2 , x.x - 124.5 , x.y + 99.4 ));
+  vec3 c = vec3( s , s1 , s2 );
+  return c;
+}
+`
+
+const curlNoise = `
+vec3 curlNoise(vec3 p) {
+  const float e = .1;
+  vec3 dx = vec3( e   , 0.0 , 0.0 );
+  vec3 dy = vec3( 0.0 , e   , 0.0 );
+  vec3 dz = vec3( 0.0 , 0.0 , e   );
+
+  vec3 p_x0 = snoiseVec3( p - dx );
+  vec3 p_x1 = snoiseVec3( p + dx );
+  vec3 p_y0 = snoiseVec3( p - dy );
+  vec3 p_y1 = snoiseVec3( p + dy );
+  vec3 p_z0 = snoiseVec3( p - dz );
+  vec3 p_z1 = snoiseVec3( p + dz );
+
+  float x = p_y1.z - p_y0.z - p_z1.y + p_z0.y;
+  float y = p_z1.x - p_z0.x - p_x1.z + p_x0.z;
+  float z = p_x1.y - p_x0.y - p_y1.x + p_y0.x;
+
+  const float divisor = 1.0 / ( 2.0 * e );
+  return normalize( vec3( x , y , z ) * divisor );
+}
+`
+
+// Simulation Material
+class SimulationMaterial extends THREE.ShaderMaterial {
+  constructor(size = 512) {
+    const positionsTexture = new THREE.DataTexture(
+      getRandomSphere(size * size, 1),
+      size,
+      size,
+      THREE.RGBAFormat,
+      THREE.FloatType
+    )
+    positionsTexture.needsUpdate = true
+
+    super({
+      uniforms: {
+        positions: { value: positionsTexture },
+        uFrequency: { value: 0.25 },
+        uTime: { value: 0 }
+      },
+      vertexShader: `
+        precision mediump float;
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        precision mediump float;
+        precision mediump sampler2D;
+        uniform float uTime;
+        uniform float uFrequency;
+        uniform sampler2D positions;
+        varying vec2 vUv;
+
+        ${simplexNoise}
+        ${snoiseVec3}
+        ${curlNoise}
+
+        void main() {
+          float time = uTime * 0.015;
+          vec3 pos = texture2D(positions, vUv).rgb;
+          vec3 curlPos = texture2D(positions, vUv).rgb;
+
+          pos = curlNoise(pos * uFrequency + time);
+          curlPos = curlNoise(curlPos * uFrequency + time);
+          curlPos += curlNoise(curlPos * uFrequency * 2.0) * 0.5;
+          curlPos += curlNoise(curlPos * uFrequency * 4.0) * 0.25;
+          curlPos += curlNoise(curlPos * uFrequency * 8.0) * 0.125;
+
+          gl_FragColor = vec4(mix(pos, curlPos, snoise(pos + time) * 0.5 + 0.5), 1.0);
+        }
+      `
+    })
+  }
+}
+
+// Depth of Field Material
+class DepthOfFieldMaterial extends THREE.ShaderMaterial {
+  constructor() {
+    super({
+      uniforms: {
+        positions: { value: null },
+        pointSize: { value: 3 },
+        uTime: { value: 0 },
+        uFocus: { value: 4 },
+        uFov: { value: 45 },
+        uBlur: { value: 30 },
+        uGradientColors: { value: new Float32Array([1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1]) },
+        uGradientStops: { value: new Float32Array([0.0, 0.3, 0.7, 1.0]) },
+        uGradientRadius: { value: 2.0 }
+      },
+      vertexShader: `
+        precision mediump float;
+        uniform sampler2D positions;
+        uniform float pointSize;
+        uniform float uTime;
+        uniform float uFocus;
+        uniform float uFov;
+        uniform float uBlur;
+        uniform float uGradientRadius;
+        varying float vDistance;
+        varying float vGradientDistance;
+        varying vec3 vWorldPosition;
+
+        void main() {
+          vec3 pos = texture2D(positions, position.xy).xyz;
+          vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+          vec4 worldPosition = modelMatrix * vec4(pos, 1.0);
+
+          gl_Position = projectionMatrix * mvPosition;
+
+          vDistance = abs(uFocus - -mvPosition.z);
+          vGradientDistance = length(worldPosition.xyz) / uGradientRadius;
+
+          float sizeFactor = step(1.0 - (1.0 / uFov), position.x);
+          gl_PointSize = sizeFactor * vDistance * uBlur;
+        }
+      `,
+      fragmentShader: `
+        precision mediump float;
+        varying float vDistance;
+        varying float vGradientDistance;
+        varying vec3 vWorldPosition;
+        uniform vec3 uGradientColors[4];
+        uniform float uGradientStops[4];
+        uniform float uTime;
+
+        vec3 getGradientColor(float t) {
+          t = clamp(t, 0.0, 1.0);
+          vec3 color = mix(uGradientColors[0], uGradientColors[1], smoothstep(uGradientStops[0], uGradientStops[1], t));
+          color = mix(color, uGradientColors[2], smoothstep(uGradientStops[1], uGradientStops[2], t));
+          color = mix(color, uGradientColors[3], smoothstep(uGradientStops[2], uGradientStops[3], t));
+          return color;
+        }
+
+        void main() {
+          vec2 cxy = 2.0 * gl_PointCoord - 1.0;
+          float r2 = dot(cxy, cxy);
+          if (r2 > 1.0) discard;
+          float mask = 1.0 - smoothstep(0.95, 1.0, r2);
+
+          float alpha = (1.04 - clamp(vDistance, 0.0, 1.0)) * mask;
+
+          float timeOffset = sin(uTime * 0.5) * 0.1;
+          vec3 gradientColor = getGradientColor(vGradientDistance + timeOffset);
+
+          gl_FragColor = vec4(gradientColor, alpha);
+        }
+      `,
+      transparent: true,
+      blending: THREE.NormalBlending,
+      depthWrite: false
+    })
+  }
+}
+
+// Extend materials
+extend({ SimulationMaterial, DepthOfFieldMaterial })
+
+// Particles Component
+function Particles({ 
+  frequency = 0.15,
+  speedFactor = 4, 
+  fov = 35, 
+  blur = 24, 
+  focus = 8.7,
+  size = 256,
+  gradientColors = ['#F0F4FF', '#637AFF', '#372CD5', '#F0F4FF'],
+  gradientStops = [0.6, 0.65, 0.75, 0.8],
+  gradientRadius = 1.35,
+  ...props 
+}) {
+  const simRef = useRef()
+  const renderRef = useRef()
+  
+  // Set up FBO scene
+  const [scene] = useState(() => new THREE.Scene())
+  const [camera] = useState(() => new THREE.OrthographicCamera(-1, 1, 1, -1, 1 / Math.pow(2, 53), 1))
+  const [positions] = useState(() => new Float32Array([-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0]))
+  const [uvs] = useState(() => new Float32Array([0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0]))
+  
+  const target = useFBO(size, size, {
+    minFilter: THREE.NearestFilter,
+    magFilter: THREE.NearestFilter,
+    format: THREE.RGBAFormat,
+    stencilBuffer: false,
+    type: THREE.FloatType
+  })
+  
+  // Generate particle positions as UV coordinates
+  const particles = useMemo(() => {
+    const length = size * size
+    const particles = new Float32Array(length * 3)
+    
+    for (let i = 0; i < length; i++) {
+      const i3 = i * 3
+      particles[i3 + 0] = (i % size) / size
+      particles[i3 + 1] = Math.floor(i / size) / size  
+      particles[i3 + 2] = 0
+    }
+
+    return particles
+  }, [size])
+  
+  // Convert gradient colors to uniform format
+  const gradientData = useMemo(() => {
+    const colors = gradientColors.map(color => {
+      const rgb = hexToRgb(color);
+      return [rgb.r, rgb.g, rgb.b];
+    });
+    
+    return {
+      colors: new Float32Array(colors.flat()),
+      stops: new Float32Array(gradientStops)
+    };
+  }, [gradientColors, gradientStops]);
+  
+  // Update simulation every frame
+  useFrame(({ gl, clock }) => {
+    if (!simRef.current || !renderRef.current) return
+    
+    // Render simulation to FBO
+    gl.setRenderTarget(target)
+    gl.clear()
+    gl.render(scene, camera)
+    gl.setRenderTarget(null)
+    
+    // Update render material with type assertion
+    const renderMaterial = renderRef.current
+    if (renderMaterial && renderMaterial.uniforms) {
+      renderMaterial.uniforms.positions.value = target.texture
+      renderMaterial.uniforms.uFocus.value = focus
+      renderMaterial.uniforms.uFov.value = fov
+      renderMaterial.uniforms.uBlur.value = blur
+      renderMaterial.uniforms.uGradientColors.value = gradientData.colors
+      renderMaterial.uniforms.uGradientStops.value = gradientData.stops
+      renderMaterial.uniforms.uGradientRadius.value = gradientRadius
+      renderMaterial.uniforms.uTime.value = clock.elapsedTime
+    }
+    
+    // Update simulation material with type assertion
+    const simMaterial = simRef.current
+    if (simMaterial && simMaterial.uniforms) {
+      simMaterial.uniforms.uTime.value = clock.elapsedTime * speedFactor
+      simMaterial.uniforms.uFrequency.value = THREE.MathUtils.lerp(
+        simMaterial.uniforms.uFrequency.value, 
+        frequency, 
+        0.1
+      )
+    }
+  })
+  
+  return (
+    <>
+      {/* Simulation mesh rendered to FBO */}
+      {createPortal(
+        <mesh>
+          <simulationMaterial ref={simRef} args={[size]} />
+          <bufferGeometry>
+            <bufferAttribute attach="attributes-position" count={positions.length / 3} array={positions} itemSize={3} />
+            <bufferAttribute attach="attributes-uv" count={uvs.length / 2} array={uvs} itemSize={2} />
+          </bufferGeometry>
+        </mesh>,
+        scene
+      )}
+      
+      {/* Points using FBO texture for positions */}
+      <points {...props}>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" count={particles.length / 3} array={particles} itemSize={3} />
+        </bufferGeometry>
+        <depthOfFieldMaterial ref={renderRef} />
+      </points>
+    </>
+  )
+}
+
+// Internal App Component
+function App({
+  frequency = 0.15,
+  speedFactor = 4,
+  rotationSpeed = 3.3,
+  gradientColors = ['#F0F4FF', '#637AFF', '#372CD5', '#F0F4FF'],
+  gradientStops = [0.6, 0.65, 0.75, 0.8],
+  gradientRadius = 1.35,
+  autoRotate = true,
+  enableVerticalRotation = true
+}) {
+  // Device detection
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+  const safariSizes = isMobile ? 128 : 256
+  const otherBrowserSizes = isMobile ? 128 : 300
+  const actualSize = isSafari ? safariSizes : otherBrowserSizes
+
+  const { camera } = useThree()
+  const controlsRef = useRef()
+
+  // Use useFrame to update controls
+  useFrame((state, delta) => {
+    if (controlsRef.current && controlsRef.current.update) {
+      controlsRef.current.update(delta)
+    }
+  })
+
+  // Update camera position
+  useEffect(() => {
+    camera.position.set(0, 0, 7.6)
+  }, [camera])
+
+  return (
+    <>
+      <OrbitControls
+        ref={controlsRef}
+        makeDefault
+        autoRotate={autoRotate}
+        autoRotateSpeed={rotationSpeed}
+        enableZoom={false}
+        enableDamping={true}
+        dampingFactor={0.05}
+        enableRotate={true}
+        minPolarAngle={enableVerticalRotation ? 0 : Math.PI / 2}
+        maxPolarAngle={enableVerticalRotation ? Math.PI : Math.PI / 2}
+      />
+      <ambientLight />
+      <Particles
+        frequency={frequency}
+        speedFactor={speedFactor}
+        fov={35}
+        blur={24}
+        focus={8.7}
+        position={[0, 0, 0]}
+        size={actualSize}
+        gradientColors={gradientColors}
+        gradientStops={gradientStops}
+        gradientRadius={gradientRadius}
+      />
+    </>
+  )
+}
+
+// Main Export for CDN Usage
+export default function ParticleSystem({ 
+  width = "100%", 
+  height = "100%",
+  backgroundColor = '#000000',
+  frequency = 0.15,
+  speedFactor = 4,
+  rotationSpeed = 3.3,
+  gradientColors = ['#F0F4FF', '#637AFF', '#372CD5', '#F0F4FF'],
+  gradientStops = [0.6, 0.65, 0.75, 0.8],
+  gradientRadius = 1.35,
+  autoRotate = true,
+  enableVerticalRotation,
+  style = {},
+  ...props 
+}) {
+  // Auto-detect vertical rotation based on device if not explicitly set
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  const finalEnableVerticalRotation = enableVerticalRotation !== undefined ? enableVerticalRotation : !isMobile
+
+  return (
+    <div style={{ width, height, ...style }} {...props}>
+      <Canvas
+        camera={{
+          fov: 35,
+          position: [0, 0, 7.6]
+        }}
+        gl={{
+          alpha: true,
+          antialias: true,
+          powerPreference: "high-performance",
+          desynchronized: true,
+          premultipliedAlpha: false,
+          preserveDrawingBuffer: false,
+          failIfMajorPerformanceCaveat: false,
+          stencil: false,
+          depth: true
+        }}
+        resize={{ scroll: false }}
+        dpr={[1, 2]}
+        style={{ background: backgroundColor }}
+      >
+        <App 
+          frequency={frequency}
+          speedFactor={speedFactor}
+          rotationSpeed={rotationSpeed}
+          gradientColors={gradientColors}
+          gradientStops={gradientStops}
+          gradientRadius={gradientRadius}
+          autoRotate={autoRotate}
+          enableVerticalRotation={finalEnableVerticalRotation}
+        />
+      </Canvas>
+    </div>
+  )
+}

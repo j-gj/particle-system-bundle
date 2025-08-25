@@ -440,7 +440,7 @@ function App({
   cameraZ = 7.6,
   particles = 256
 }) {
-  const { camera, gl } = useThree()
+  const { camera, gl, size } = useThree()
   const controlsRef = useRef()
 
   // Set renderer clear color
@@ -448,6 +448,23 @@ function App({
     const color = new THREE.Color(backgroundColor);
     gl.setClearColor(color, 1);
   }, [gl, backgroundColor]);
+  
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+    //   camera.aspect = window.innerWidth / window.innerHeight
+        camera.aspect = size.width / size.height
+      camera.updateProjectionMatrix()
+      //gl.setSize(window.innerWidth, window.innerHeight)
+      gl.setSize(size.width, size.height)
+      //let Canvas handle DPR
+    //   gl.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    }
+    window.addEventListener('resize', handleResize)
+    handleResize()
+    return () => window.removeEventListener('resize', handleResize)
+  }, [camera, gl, size])
 
   // Use useFrame to update controls
   useFrame((state, delta) => {

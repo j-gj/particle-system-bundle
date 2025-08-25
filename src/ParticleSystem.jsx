@@ -425,6 +425,7 @@ function Particles({
 
 // Internal App Component
 function App({
+  backgroundColor = '#fff', // Add backgroundColor prop
   frequency = 0.15,
   speedFactor = 4,
   rotationSpeed = 3.3,
@@ -439,16 +440,14 @@ function App({
   cameraZ = 7.6,
   particles = 256
 }) {
-  // Device detection
-//   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-//   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-//   const safariSizes = isMobile ? 128 : 256
-//   const otherBrowserSizes = isMobile ? 128 : 300
-//   const actualSize = isSafari ? safariSizes : otherBrowserSizes
-  const actualSize = particles;
-
-  const { camera } = useThree()
+  const { camera, gl } = useThree()
   const controlsRef = useRef()
+
+  // Set renderer clear color
+  useEffect(() => {
+    const color = new THREE.Color(backgroundColor);
+    gl.setClearColor(color, 1);
+  }, [gl, backgroundColor]);
 
   // Use useFrame to update controls
   useFrame((state, delta) => {
@@ -484,7 +483,7 @@ function App({
         blur={blur}
         focus={focus}
         position={[0, 0, 0]}
-        size={actualSize}
+        size={particles}
         gradientColors={gradientColors}
         gradientStops={gradientStops}
         gradientRadius={gradientRadius}
@@ -495,7 +494,7 @@ function App({
 
 // Main Export for CDN Usage
 export default function ParticleSystem({
-  backgroundColor = '#637AFF',
+  backgroundColor = '#fff',
   frequency = 0.15,
   speedFactor = 4,
   rotationSpeed = 0.3,
@@ -510,7 +509,6 @@ export default function ParticleSystem({
   cameraZ = 7.6,
   particles = 256,
 }) {
-
   return (
     <Canvas
         camera={{
@@ -518,7 +516,7 @@ export default function ParticleSystem({
           position: [0, 0, cameraZ]
         }}
         gl={{
-          alpha: false, //we're setting background so can say false
+          alpha: false, // Keep alpha false for slight performance benefit
           antialias: true,
           powerPreference: "high-performance",
           desynchronized: true,
@@ -536,10 +534,11 @@ export default function ParticleSystem({
             display: 'block',
             minWidth: '200px',
             minHeight: '200px',
-            background: backgroundColor 
+            background: backgroundColor // Fallback for non-WebGL scenarios
         }}
       >
         <App 
+          backgroundColor={backgroundColor} // Pass backgroundColor to App
           frequency={frequency}
           speedFactor={speedFactor}
           rotationSpeed={rotationSpeed}

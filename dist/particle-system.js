@@ -38221,11 +38221,10 @@ function uB({
   focus: x = 8.7,
   fov: M = 35,
   cameraZ: T = 7.6,
-  style: C = {},
-  ...w
+  ...C
 }) {
-  const E = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent), L = v !== void 0 ? v : !E;
-  return /* @__PURE__ */ Mn.jsx("div", { style: { width: s, height: e, ...C }, ...w, children: /* @__PURE__ */ Mn.jsx(
+  const w = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent), E = v !== void 0 ? v : !w;
+  return /* @__PURE__ */ Mn.jsx("div", { style: { width: s, height: e, backgroundColor: t }, ...C, children: /* @__PURE__ */ Mn.jsx(
     Fz,
     {
       camera: {
@@ -38256,7 +38255,7 @@ function uB({
           gradientStops: f,
           gradientRadius: h,
           autoRotate: p,
-          enableVerticalRotation: L,
+          enableVerticalRotation: E,
           blur: y,
           focus: x,
           fov: M,

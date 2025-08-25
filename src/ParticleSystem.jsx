@@ -508,7 +508,6 @@ export default function ParticleSystem({
   focus = 8.7,
   fov = 35,
   cameraZ = 7.6,
-  style = {},
   ...props 
 }) {
   // Auto-detect vertical rotation based on device if not explicitly set
@@ -516,7 +515,7 @@ export default function ParticleSystem({
   const finalEnableVerticalRotation = enableVerticalRotation !== undefined ? enableVerticalRotation : !isMobile
 
   return (
-    <div style={{ width, height, ...style }} {...props}>
+    <div style={{ width, height, backgroundColor }} {...props}>
       <Canvas
         camera={{
           fov: fov,

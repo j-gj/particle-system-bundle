@@ -510,11 +510,11 @@ function App({
 }
 
 export default function ParticleSystem({
-  backgroundColor = '#fff',
+  backgroundColor = "#fff",
   frequency = 0.15,
   speedFactor = 4,
   rotationSpeed = 0.3,
-  gradientColors = ['#F0F4FF', '#637AFF', '#372CD5', '#F0F4FF'],
+  gradientColors = ["#F0F4FF", "#637AFF", "#372CD5", "#F0F4FF"],
   gradientStops = [0.6, 0.65, 0.75, 0.8],
   gradientRadius = 1.35,
   autoRotate = true,
@@ -525,40 +525,8 @@ export default function ParticleSystem({
   cameraZ = 7.6,
   particles = 256,
 }) {
-  const ref = useRef(null)
-
-  useEffect(() => {
-    // Only apply in Framer canvas (not in published webpage)
-    const isFramerCanvas = window.location.hostname.includes('framer')
-    if (!isFramerCanvas) return
-
-    const updateSize = () => {
-      if (ref.current) {
-        const parent = ref.current.parentElement
-        if (parent) {
-          const { width, height } = parent.getBoundingClientRect()
-          ref.current.style.width = `${width}px`
-          ref.current.style.height = `${height}px`
-        }
-      }
-    }
-    updateSize()
-    window.addEventListener('resize', updateSize)
-    return () => window.removeEventListener('resize', updateSize)
-  }, [])
-
-
   return (
-    <div
-      ref={ref}
-      style={{
-        width: '100%',
-        height: '100%',
-        display: 'block',
-        minWidth: '200px',
-        minHeight: '200px',
-      }}
-    >
+    <div style={{ width: "100%", height: "100%", position: "relative" }}>
       <Canvas
         camera={{ fov, position: [0, 0, cameraZ] }}
         gl={{
@@ -572,10 +540,15 @@ export default function ParticleSystem({
           stencil: false,
           depth: true,
         }}
-        resize={{ scroll: false }}
         dpr={[1, 2]}
-
-        style={{ background: backgroundColor }}
+        // 👇 Critical: ignore editor zoom (transform: scale) and use offset sizes
+        resize={{ scroll: false, offsetSize: true }}
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "block",
+          background: backgroundColor,
+        }}
       >
         <App
           backgroundColor={backgroundColor}

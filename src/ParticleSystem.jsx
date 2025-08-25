@@ -436,14 +436,16 @@ function App({
   blur = 24,
   focus = 8.7,
   fov = 35,
-  cameraZ = 7.6
+  cameraZ = 7.6,
+  particles = 256
 }) {
   // Device detection
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-  const safariSizes = isMobile ? 128 : 256
-  const otherBrowserSizes = isMobile ? 128 : 300
-  const actualSize = isSafari ? safariSizes : otherBrowserSizes
+//   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+//   const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+//   const safariSizes = isMobile ? 128 : 256
+//   const otherBrowserSizes = isMobile ? 128 : 300
+//   const actualSize = isSafari ? safariSizes : otherBrowserSizes
+  const actualSize = particles;
 
   const { camera } = useThree()
   const controlsRef = useRef()
@@ -503,16 +505,14 @@ export default function ParticleSystem({
   gradientStops = [0.6, 0.65, 0.75, 0.8],
   gradientRadius = 1.35,
   autoRotate = true,
-  enableVerticalRotation,
+  enableVerticalRotation = false,
   blur = 24,
   focus = 8.7,
   fov = 35,
   cameraZ = 7.6,
+  particles = 256,
   ...props 
 }) {
-  // Auto-detect vertical rotation based on device if not explicitly set
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  const finalEnableVerticalRotation = enableVerticalRotation !== undefined ? enableVerticalRotation : !isMobile
 
   return (
     <div style={{ width, height, backgroundColor }} {...props}>
@@ -544,11 +544,12 @@ export default function ParticleSystem({
           gradientStops={gradientStops}
           gradientRadius={gradientRadius}
           autoRotate={autoRotate}
-          enableVerticalRotation={finalEnableVerticalRotation}
+          enableVerticalRotation={enableVerticalRotation}
           blur={blur}
           focus={focus}
           fov={fov}
           cameraZ={cameraZ}
+          particles={particles}
         />
       </Canvas>
     </div>

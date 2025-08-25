@@ -38164,18 +38164,19 @@ function iB({
   blur: h = 24,
   focus: p = 8.7,
   fov: v = 35,
-  cameraZ: y = 7.6
+  cameraZ: y = 7.6,
+  particles: x = 256
 }) {
-  const x = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent), w = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ? x ? 128 : 256 : x ? 128 : 300, { camera: E } = gs(), L = ys();
-  return rM((R, U) => {
-    L.current && L.current.update && L.current.update(U);
+  const M = x, { camera: T } = gs(), C = ys();
+  return rM((w, E) => {
+    C.current && C.current.update && C.current.update(E);
   }), fc(() => {
-    E.position.set(0, 0, y);
-  }, [y, E]), /* @__PURE__ */ Mn.jsxs(Mn.Fragment, { children: [
+    T.position.set(0, 0, y);
+  }, [y, T]), /* @__PURE__ */ Mn.jsxs(Mn.Fragment, { children: [
     /* @__PURE__ */ Mn.jsx(
       jz,
       {
-        ref: L,
+        ref: C,
         makeDefault: !0,
         autoRotate: c,
         autoRotateSpeed: t,
@@ -38197,7 +38198,7 @@ function iB({
         blur: h,
         focus: p,
         position: [0, 0, 0],
-        size: w,
+        size: M,
         gradientColors: n,
         gradientStops: r,
         gradientRadius: o
@@ -38216,15 +38217,15 @@ function uB({
   gradientStops: f = [0.6, 0.65, 0.75, 0.8],
   gradientRadius: h = 1.35,
   autoRotate: p = !0,
-  enableVerticalRotation: v,
+  enableVerticalRotation: v = !1,
   blur: y = 24,
   focus: x = 8.7,
   fov: M = 35,
   cameraZ: T = 7.6,
-  ...C
+  particles: C = 256,
+  ...w
 }) {
-  const w = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent), E = v !== void 0 ? v : !w;
-  return /* @__PURE__ */ Mn.jsx("div", { style: { width: s, height: e, backgroundColor: t }, ...C, children: /* @__PURE__ */ Mn.jsx(
+  return /* @__PURE__ */ Mn.jsx("div", { style: { width: s, height: e, backgroundColor: t }, ...w, children: /* @__PURE__ */ Mn.jsx(
     Fz,
     {
       camera: {
@@ -38255,11 +38256,12 @@ function uB({
           gradientStops: f,
           gradientRadius: h,
           autoRotate: p,
-          enableVerticalRotation: E,
+          enableVerticalRotation: v,
           blur: y,
           focus: x,
           fov: M,
-          cameraZ: T
+          cameraZ: T,
+          particles: C
         }
       )
     }

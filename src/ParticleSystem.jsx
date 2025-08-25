@@ -493,8 +493,8 @@ function App({
 }
 
 /**
- * @framerSupportedLayoutWidth auto
- * @framerSupportedLayoutHeight auto
+ * @framerSupportedLayoutWidth any
+ * @framerSupportedLayoutHeight any
  * @framerIntrinsicWidth 200
  * @framerIntrinsicHeight 200
  */

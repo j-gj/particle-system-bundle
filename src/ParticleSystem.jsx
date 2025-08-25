@@ -494,9 +494,7 @@ function App({
 }
 
 // Main Export for CDN Usage
-export default function ParticleSystem({ 
-  width = "100%", 
-  height = "100%",
+export default function ParticleSystem({
   backgroundColor = '#000000',
   frequency = 0.15,
   speedFactor = 4,
@@ -511,18 +509,16 @@ export default function ParticleSystem({
   fov = 35,
   cameraZ = 7.6,
   particles = 256,
-  ...props 
 }) {
 
   return (
-    <div style={{ width, height, backgroundColor }} {...props}>
-      <Canvas
+    <Canvas
         camera={{
           fov: fov,
           position: [0, 0, cameraZ]
         }}
         gl={{
-          alpha: true,
+          alpha: false, //we're setting background so can say false
           antialias: true,
           powerPreference: "high-performance",
           desynchronized: true,
@@ -534,7 +530,14 @@ export default function ParticleSystem({
         }}
         resize={{ scroll: false }}
         dpr={[1, 2]}
-        style={{ background: backgroundColor }}
+        style={{ 
+            width: '100%', 
+            height: '100%', 
+            display: 'block',
+            minWidth: '200px',
+            minHeight: '200px',
+            background: backgroundColor 
+        }}
       >
         <App 
           frequency={frequency}
@@ -552,6 +555,5 @@ export default function ParticleSystem({
           particles={particles}
         />
       </Canvas>
-    </div>
   )
 }

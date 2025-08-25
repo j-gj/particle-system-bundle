@@ -644,7 +644,7 @@ React keys must be passed directly to JSX without using spread:
   }()), kh;
 }
 process.env.NODE_ENV === "production" ? gx.exports = o2() : gx.exports = l2();
-var Mn = gx.exports;
+var bn = gx.exports;
 /**
  * @license
  * Copyright 2010-2023 Three.js Authors
@@ -19656,7 +19656,7 @@ const KS = "\\[\\]\\.:\\/", uF = new RegExp("[" + KS + "]", "g"), QS = "[^" + KS
 ), vF = ["material", "materials", "bones", "map"];
 class gF {
   constructor(e, t, n) {
-    const r = n || bn.parseTrackName(t);
+    const r = n || Tn.parseTrackName(t);
     this._targetGroup = e, this._bindings = e.subscribe_(t, r);
   }
   getValue(e, t) {
@@ -19680,12 +19680,12 @@ class gF {
       e[t].unbind();
   }
 }
-class bn {
+class Tn {
   constructor(e, t, n) {
-    this.path = t, this.parsedPath = n || bn.parseTrackName(t), this.node = bn.findNode(e, this.parsedPath.nodeName), this.rootNode = e, this.getValue = this._getValue_unbound, this.setValue = this._setValue_unbound;
+    this.path = t, this.parsedPath = n || Tn.parseTrackName(t), this.node = Tn.findNode(e, this.parsedPath.nodeName), this.rootNode = e, this.getValue = this._getValue_unbound, this.setValue = this._setValue_unbound;
   }
   static create(e, t, n) {
-    return e && e.isAnimationObjectGroup ? new bn.Composite(e, t, n) : new bn(e, t, n);
+    return e && e.isAnimationObjectGroup ? new Tn.Composite(e, t, n) : new Tn(e, t, n);
   }
   /**
    * Replaces spaces with underscores and removes unsupported characters from
@@ -19822,7 +19822,7 @@ class bn {
     let e = this.node;
     const t = this.parsedPath, n = t.objectName, r = t.propertyName;
     let o = t.propertyIndex;
-    if (e || (e = bn.findNode(this.rootNode, t.nodeName), this.node = e), this.getValue = this._getValue_unavailable, this.setValue = this._setValue_unavailable, !e) {
+    if (e || (e = Tn.findNode(this.rootNode, t.nodeName), this.node = e), this.getValue = this._getValue_unavailable, this.setValue = this._setValue_unavailable, !e) {
       console.warn("THREE.PropertyBinding: No target node found for track: " + this.path + ".");
       return;
     }
@@ -19912,48 +19912,48 @@ class bn {
     this.node = null, this.getValue = this._getValue_unbound, this.setValue = this._setValue_unbound;
   }
 }
-bn.Composite = gF;
-bn.prototype.BindingType = {
+Tn.Composite = gF;
+Tn.prototype.BindingType = {
   Direct: 0,
   EntireArray: 1,
   ArrayElement: 2,
   HasFromToArray: 3
 };
-bn.prototype.Versioning = {
+Tn.prototype.Versioning = {
   None: 0,
   NeedsUpdate: 1,
   MatrixWorldNeedsUpdate: 2
 };
-bn.prototype.GetterByBindingType = [
-  bn.prototype._getValue_direct,
-  bn.prototype._getValue_array,
-  bn.prototype._getValue_arrayElement,
-  bn.prototype._getValue_toArray
+Tn.prototype.GetterByBindingType = [
+  Tn.prototype._getValue_direct,
+  Tn.prototype._getValue_array,
+  Tn.prototype._getValue_arrayElement,
+  Tn.prototype._getValue_toArray
 ];
-bn.prototype.SetterByBindingTypeAndVersioning = [
+Tn.prototype.SetterByBindingTypeAndVersioning = [
   [
     // Direct
-    bn.prototype._setValue_direct,
-    bn.prototype._setValue_direct_setNeedsUpdate,
-    bn.prototype._setValue_direct_setMatrixWorldNeedsUpdate
+    Tn.prototype._setValue_direct,
+    Tn.prototype._setValue_direct_setNeedsUpdate,
+    Tn.prototype._setValue_direct_setMatrixWorldNeedsUpdate
   ],
   [
     // EntireArray
-    bn.prototype._setValue_array,
-    bn.prototype._setValue_array_setNeedsUpdate,
-    bn.prototype._setValue_array_setMatrixWorldNeedsUpdate
+    Tn.prototype._setValue_array,
+    Tn.prototype._setValue_array_setNeedsUpdate,
+    Tn.prototype._setValue_array_setMatrixWorldNeedsUpdate
   ],
   [
     // ArrayElement
-    bn.prototype._setValue_arrayElement,
-    bn.prototype._setValue_arrayElement_setNeedsUpdate,
-    bn.prototype._setValue_arrayElement_setMatrixWorldNeedsUpdate
+    Tn.prototype._setValue_arrayElement,
+    Tn.prototype._setValue_arrayElement_setNeedsUpdate,
+    Tn.prototype._setValue_arrayElement_setMatrixWorldNeedsUpdate
   ],
   [
     // HasToFromArray
-    bn.prototype._setValue_fromArray,
-    bn.prototype._setValue_fromArray_setNeedsUpdate,
-    bn.prototype._setValue_fromArray_setMatrixWorldNeedsUpdate
+    Tn.prototype._setValue_fromArray,
+    Tn.prototype._setValue_fromArray_setNeedsUpdate,
+    Tn.prototype._setValue_fromArray_setMatrixWorldNeedsUpdate
   ]
 ];
 class yF {
@@ -19988,7 +19988,7 @@ class yF {
       if (T === void 0) {
         T = h++, t[M] = T, e.push(x);
         for (let C = 0, w = c; C !== w; ++C)
-          o[C].push(new bn(x, n[C], r[C]));
+          o[C].push(new Tn(x, n[C], r[C]));
       } else if (T < p) {
         f = e[T];
         const C = --p, w = e[C];
@@ -19996,7 +19996,7 @@ class yF {
         for (let E = 0, L = c; E !== L; ++E) {
           const R = o[E], U = R[C];
           let I = R[T];
-          R[T] = U, I === void 0 && (I = new bn(x, n[E], r[E])), R[C] = I;
+          R[T] = U, I === void 0 && (I = new Tn(x, n[E], r[E])), R[C] = I;
         }
       } else
         e[T] !== f && console.error("THREE.AnimationObjectGroup: Different objects with the same UUID detected. Clean the caches or recreate your infrastructure when reloading scenes.");
@@ -20055,7 +20055,7 @@ class yF {
     r = o.length, n[e] = r, c.push(e), f.push(t), o.push(y);
     for (let x = v, M = h.length; x !== M; ++x) {
       const T = h[x];
-      y[x] = new bn(T, e, t);
+      y[x] = new Tn(T, e, t);
     }
     return y;
   }
@@ -20312,7 +20312,7 @@ class xF extends Xo {
         }
         const C = t && t._propertyBindings[y].binding.parsedPath;
         T = new nR(
-          bn.create(n, M, C),
+          Tn.create(n, M, C),
           x.ValueTypeName,
           x.getValueSize()
         ), ++T.referenceCount, this._addInactiveBinding(T, h, M), c[y] = T;
@@ -21561,7 +21561,7 @@ const GF = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   PolarGridHelper: NF,
   PolyhedronGeometry: iu,
   PositionalAudio: oF,
-  PropertyBinding: bn,
+  PropertyBinding: Tn,
   PropertyMixer: nR,
   QuadraticBezierCurve: HS,
   QuadraticBezierCurve3: VS,
@@ -24562,7 +24562,7 @@ Error generating stack: ` + D.message + `
           try {
             g(null);
           } catch (S) {
-            En(l, u, S);
+            Mn(l, u, S);
           }
         else
           g.current = null;
@@ -24571,7 +24571,7 @@ Error generating stack: ` + D.message + `
       try {
         g();
       } catch (S) {
-        En(l, u, S);
+        Mn(l, u, S);
       }
     }
     var om = !1;
@@ -24608,7 +24608,7 @@ Error generating stack: ` + D.message + `
                     throw Error(c(163));
                 }
             } catch (oe) {
-              En(l, l.return, oe);
+              Mn(l, l.return, oe);
             }
             if (u = l.sibling, u !== null) {
               u.return = l.return, mt = u;
@@ -24681,7 +24681,7 @@ Error generating stack: ` + D.message + `
             try {
               l.props = u.memoizedProps, l.state = u.memoizedState, l.componentWillUnmount();
             } catch (j) {
-              En(
+              Mn(
                 u,
                 g,
                 j
@@ -24921,7 +24921,7 @@ Error generating stack: ` + D.message + `
               var j = A.alternate;
               j !== null && (j.return = null), A.return = null;
             } catch (Lt) {
-              En(A, u, Lt);
+              Mn(A, u, Lt);
             }
           }
         if (g = u.child, u.subtreeFlags & 12854 && g !== null)
@@ -24998,7 +24998,7 @@ Error generating stack: ` + D.message + `
                                 try {
                                   be.props = S.memoizedProps, be.state = S.memoizedState, be.componentWillUnmount();
                                 } catch (Lt) {
-                                  En(
+                                  Mn(
                                     S,
                                     pt,
                                     Lt
@@ -25038,7 +25038,7 @@ Error generating stack: ` + D.message + `
                   Kd(u.alternate, u);
               }
             } catch (Lt) {
-              En(u, u.return, Lt);
+              Mn(u, u.return, Lt);
             }
             if (g = u.sibling, g !== null) {
               g.return = u.return, mt = g;
@@ -25144,7 +25144,7 @@ Error generating stack: ` + D.message + `
               }
             Ps || u.flags & 512 && qd(u);
           } catch (Wt) {
-            En(u, u.return, Wt);
+            Mn(u, u.return, Wt);
           }
         }
         if (u === l) {
@@ -25185,7 +25185,7 @@ Error generating stack: ` + D.message + `
               try {
                 mo(4, u);
               } catch (Ae) {
-                En(u, g, Ae);
+                Mn(u, g, Ae);
               }
               break;
             case 1:
@@ -25195,14 +25195,14 @@ Error generating stack: ` + D.message + `
                 try {
                   S.componentDidMount();
                 } catch (Ae) {
-                  En(u, A, Ae);
+                  Mn(u, A, Ae);
                 }
               }
               var D = u.return;
               try {
                 qd(u);
               } catch (Ae) {
-                En(u, D, Ae);
+                Mn(u, D, Ae);
               }
               break;
             case 5:
@@ -25210,11 +25210,11 @@ Error generating stack: ` + D.message + `
               try {
                 qd(u);
               } catch (Ae) {
-                En(u, j, Ae);
+                Mn(u, j, Ae);
               }
           }
         } catch (Ae) {
-          En(u, u.return, Ae);
+          Mn(u, u.return, Ae);
         }
         if (u === l) {
           mt = null;
@@ -25868,7 +25868,7 @@ Error generating stack: ` + D.message + `
                             mo(9, oe);
                         }
                       } catch (Lt) {
-                        En(oe, oe.return, Lt);
+                        Mn(oe, oe.return, Lt);
                       }
                     if (oe === j) {
                       mt = null;
@@ -25899,7 +25899,7 @@ Error generating stack: ` + D.message + `
     function Fi(l, u, g) {
       u = _u(g, u), u = Jc(l, u, 1), As(l, u), u = Ji(), l = Tl(l, 1), l !== null && (su(l, 1, u), hr(l, u));
     }
-    function En(l, u, g) {
+    function Mn(l, u, g) {
       if (l.tag === 3)
         Fi(l, l, g);
       else
@@ -27967,7 +27967,7 @@ Error generating stack: ` + m.message + `
     function Fi() {
       ch.getCurrentStack = null, Dr = null, va = !1;
     }
-    function En(i) {
+    function Mn(i) {
       ch.getCurrentStack = _o, Dr = i, va = !1;
     }
     function za(i) {
@@ -28097,7 +28097,7 @@ Please update the following components: %s`, me);
             });
             var _ = xo(m);
             try {
-              En(d), p(`Legacy context API has been detected within a strict-mode tree.
+              Mn(d), p(`Legacy context API has been detected within a strict-mode tree.
 
 The old API will be supported in all 16.x releases, but applications using it should migrate to the new version.
 
@@ -29344,41 +29344,41 @@ See https://reactjs.org/link/refs-must-have-owner for more information.`);
           var pn = ve[Et];
           It = je(pn, It, _e);
         }
-        for (var Pn = null, Yn = null, Dn = De, ci = 0, Tn = 0, dn = null; Dn !== null && Tn < ve.length; Tn++) {
-          Dn.index > Tn ? (dn = Dn, Dn = null) : dn = Dn.sibling;
-          var wi = we(_e, Dn, ve[Tn], et);
+        for (var Pn = null, Yn = null, Dn = De, ci = 0, En = 0, dn = null; Dn !== null && En < ve.length; En++) {
+          Dn.index > En ? (dn = Dn, Dn = null) : dn = Dn.sibling;
+          var wi = we(_e, Dn, ve[En], et);
           if (wi === null) {
             Dn === null && (Dn = dn);
             break;
           }
-          i && Dn && wi.alternate === null && a(_e, Dn), ci = b(wi, ci, Tn), Yn === null ? Pn = wi : Yn.sibling = wi, Yn = wi, Dn = dn;
+          i && Dn && wi.alternate === null && a(_e, Dn), ci = b(wi, ci, En), Yn === null ? Pn = wi : Yn.sibling = wi, Yn = wi, Dn = dn;
         }
-        if (Tn === ve.length) {
+        if (En === ve.length) {
           if (d(_e, Dn), mr()) {
-            var fi = Tn;
+            var fi = En;
             Iu(_e, fi);
           }
           return Pn;
         }
         if (Dn === null) {
-          for (; Tn < ve.length; Tn++) {
-            var ja = me(_e, ve[Tn], et);
-            ja !== null && (ci = b(ja, ci, Tn), Yn === null ? Pn = ja : Yn.sibling = ja, Yn = ja);
+          for (; En < ve.length; En++) {
+            var ja = me(_e, ve[En], et);
+            ja !== null && (ci = b(ja, ci, En), Yn === null ? Pn = ja : Yn.sibling = ja, Yn = ja);
           }
           if (mr()) {
-            var or = Tn;
+            var or = En;
             Iu(_e, or);
           }
           return Pn;
         }
-        for (var ya = m(_e, Dn); Tn < ve.length; Tn++) {
-          var _a = Le(ya, _e, Tn, ve[Tn], et);
-          _a !== null && (i && _a.alternate !== null && ya.delete(_a.key === null ? Tn : _a.key), ci = b(_a, ci, Tn), Yn === null ? Pn = _a : Yn.sibling = _a, Yn = _a);
+        for (var ya = m(_e, Dn); En < ve.length; En++) {
+          var _a = Le(ya, _e, En, ve[En], et);
+          _a !== null && (i && _a.alternate !== null && ya.delete(_a.key === null ? En : _a.key), ci = b(_a, ci, En), Yn === null ? Pn = _a : Yn.sibling = _a, Yn = _a);
         }
         if (i && ya.forEach(function(Uf) {
           return a(_e, Uf);
         }), mr()) {
-          var Xs = Tn;
+          var Xs = En;
           Iu(_e, Xs);
         }
         return Pn;
@@ -29400,14 +29400,14 @@ See https://reactjs.org/link/refs-must-have-owner for more information.`);
         var Dn = It.call(ve);
         if (Dn == null)
           throw new Error("An iterable object provided no iterator.");
-        for (var ci = null, Tn = null, dn = De, wi = 0, fi = 0, ja = null, or = Dn.next(); dn !== null && !or.done; fi++, or = Dn.next()) {
+        for (var ci = null, En = null, dn = De, wi = 0, fi = 0, ja = null, or = Dn.next(); dn !== null && !or.done; fi++, or = Dn.next()) {
           dn.index > fi ? (ja = dn, dn = null) : ja = dn.sibling;
           var ya = we(_e, dn, or.value, et);
           if (ya === null) {
             dn === null && (dn = ja);
             break;
           }
-          i && dn && ya.alternate === null && a(_e, dn), wi = b(ya, wi, fi), Tn === null ? ci = ya : Tn.sibling = ya, Tn = ya, dn = ja;
+          i && dn && ya.alternate === null && a(_e, dn), wi = b(ya, wi, fi), En === null ? ci = ya : En.sibling = ya, En = ya, dn = ja;
         }
         if (or.done) {
           if (d(_e, dn), mr()) {
@@ -29419,7 +29419,7 @@ See https://reactjs.org/link/refs-must-have-owner for more information.`);
         if (dn === null) {
           for (; !or.done; fi++, or = Dn.next()) {
             var Xs = me(_e, or.value, et);
-            Xs !== null && (wi = b(Xs, wi, fi), Tn === null ? ci = Xs : Tn.sibling = Xs, Tn = Xs);
+            Xs !== null && (wi = b(Xs, wi, fi), En === null ? ci = Xs : En.sibling = Xs, En = Xs);
           }
           if (mr()) {
             var Uf = fi;
@@ -29429,7 +29429,7 @@ See https://reactjs.org/link/refs-must-have-owner for more information.`);
         }
         for (var Nf = m(_e, dn); !or.done; fi++, or = Dn.next()) {
           var xa = Le(Nf, _e, fi, or.value, et);
-          xa !== null && (i && xa.alternate !== null && Nf.delete(xa.key === null ? fi : xa.key), wi = b(xa, wi, fi), Tn === null ? ci = xa : Tn.sibling = xa, Tn = xa);
+          xa !== null && (i && xa.alternate !== null && Nf.delete(xa.key === null ? fi : xa.key), wi = b(xa, wi, fi), En === null ? ci = xa : En.sibling = xa, En = xa);
         }
         if (i && Nf.forEach(function(T_) {
           return a(_e, T_);
@@ -31414,8 +31414,8 @@ Visit https://reactjs.org/link/error-boundaries to learn more about error bounda
           var ci = a.type._context;
           return D(ci, a), rr(a), null;
         case qe: {
-          var Tn = a.type;
-          return Xr(Tn) && sl(a), rr(a), null;
+          var En = a.type;
+          return Xr(En) && sl(a), rr(a), null;
         }
         case it: {
           Sf(a);
@@ -31984,8 +31984,8 @@ Check the render method of \`` + m + "`.");
           var Et = m.fallback, pn = m.children, Pn = wE(i, a, pn, Et, d), Yn = a.child, Dn = i.child.memoizedState;
           return Yn.memoizedState = Dn === null ? Km(d) : SE(Dn, d), Yn.childLanes = ME(i, d), a.memoizedState = Jm, Pn;
         } else {
-          var ci = m.children, Tn = bE(i, a, ci, d);
-          return a.memoizedState = null, Tn;
+          var ci = m.children, En = bE(i, a, ci, d);
+          return a.memoizedState = null, En;
         }
       }
     }
@@ -32703,7 +32703,7 @@ Check the render method of \`` + m + "`.");
     function XC() {
       for (; xt !== null; ) {
         var i = xt;
-        En(i);
+        Mn(i);
         try {
           YC(i);
         } catch (d) {
@@ -32721,7 +32721,7 @@ Check the render method of \`` + m + "`.");
     function YC(i) {
       var a = i.alternate, d = i.flags;
       if ((d & wn) !== V) {
-        switch (En(i), i.tag) {
+        switch (Mn(i), i.tag) {
           case k:
           case ne:
           case ue:
@@ -33428,7 +33428,7 @@ Learn more about data fetching with Hooks: https://reactjs.org/link/hooks-data-f
     function oL(i, a) {
       for (; xt !== null; ) {
         var d = xt;
-        En(d);
+        Mn(d);
         try {
           lL(d, i, a);
         } catch (_) {
@@ -33534,7 +33534,7 @@ Learn more about data fetching with Hooks: https://reactjs.org/link/hooks-data-f
         var m = xt;
         if ((m.flags & At) !== V) {
           var _ = m.alternate;
-          En(m);
+          Mn(m);
           try {
             qC(a, _, m, d);
           } catch (P) {
@@ -33625,7 +33625,7 @@ Learn more about data fetching with Hooks: https://reactjs.org/link/hooks-data-f
     function $E(i) {
       for (; xt !== null; ) {
         var a = xt;
-        En(a);
+        Mn(a);
         try {
           ZC(a);
         } catch (m) {
@@ -33656,7 +33656,7 @@ Learn more about data fetching with Hooks: https://reactjs.org/link/hooks-data-f
       for (; xt !== null; ) {
         var d = xt;
         if ((d.flags & Yi) !== V) {
-          En(d);
+          Mn(d);
           try {
             mL(a, d);
           } catch (_) {
@@ -33729,7 +33729,7 @@ Learn more about data fetching with Hooks: https://reactjs.org/link/hooks-data-f
     function yL() {
       for (; xt !== null; ) {
         var i = xt;
-        (i.flags & Yi) !== V && (En(i), _L(i), Fi());
+        (i.flags & Yi) !== V && (Mn(i), _L(i), Fi());
         var a = i.sibling;
         if (a !== null) {
           Xa(a, i.return), xt = a;
@@ -33751,7 +33751,7 @@ Learn more about data fetching with Hooks: https://reactjs.org/link/hooks-data-f
     function xL(i, a) {
       for (; xt !== null; ) {
         var d = xt;
-        En(d), ML(d, a), Fi();
+        Mn(d), ML(d, a), Fi();
         var m = d.child;
         m !== null ? (Xa(m, d), xt = m) : SL(i);
       }
@@ -34562,7 +34562,7 @@ Learn more about data fetching with Hooks: https://reactjs.org/link/hooks-data-f
     }
     function p1(i) {
       var a = i.alternate;
-      En(i);
+      Mn(i);
       var d;
       (i.mode & _n) !== jt ? (M0(i), d = o_(a, i, Gs), Xm(i, !0)) : d = o_(a, i, Gs), Fi(), i.memoizedProps = i.pendingProps, d === null ? m1(i) : ui = d, J0.current = null;
     }
@@ -34571,7 +34571,7 @@ Learn more about data fetching with Hooks: https://reactjs.org/link/hooks-data-f
       do {
         var d = a.alternate, m = a.return;
         if ((a.flags & $) === V) {
-          En(a);
+          Mn(a);
           var _ = void 0;
           if ((a.mode & _n) === jt ? _ = dE(d, a, Gs) : (M0(a), _ = dE(d, a, Gs), Xm(a, !1)), Fi(), _ !== null) {
             ui = _;
@@ -34780,7 +34780,7 @@ Error message:
       Jr.flushLegacyContextWarning(), Jr.flushPendingUnsafeLifecycleWarnings();
     }
     function _1(i, a) {
-      En(i), Tv(i, de, bL), a && Tv(i, tt, wL), Tv(i, de, EL), a && Tv(i, tt, TL), Fi();
+      Mn(i), Tv(i, de, bL), a && Tv(i, tt, wL), Tv(i, de, EL), a && Tv(i, tt, TL), Fi();
     }
     function Tv(i, a, d) {
       for (var m = i, _ = null; m !== null; ) {
@@ -34805,9 +34805,9 @@ Error message:
           bv = /* @__PURE__ */ new Set([d]);
         var m = Dr;
         try {
-          En(i), p("Can't perform a React state update on a component that hasn't mounted yet. This indicates that you have a side-effect in your render function that asynchronously later calls tries to update the component. Move this work to useEffect instead.");
+          Mn(i), p("Can't perform a React state update on a component that hasn't mounted yet. This indicates that you have a side-effect in your render function that asynchronously later calls tries to update the component. Move this work to useEffect instead.");
         } finally {
-          m ? En(i) : Fi();
+          m ? Mn(i) : Fi();
         }
       }
     }
@@ -34883,7 +34883,7 @@ Error message:
         if (ds.current === null) {
           var a = Dr;
           try {
-            En(i), p(`An update to %s inside a test was not wrapped in act(...).
+            Mn(i), p(`An update to %s inside a test was not wrapped in act(...).
 
 When testing, code that causes React state updates should be wrapped into act(...):
 
@@ -34894,7 +34894,7 @@ act(() => {
 
 This ensures that you're testing the behavior the user would see in the browser. Learn more at https://reactjs.org/link/wrap-tests-with-act`, xe(i));
           } finally {
-            a ? En(i) : Fi();
+            a ? Mn(i) : Fi();
           }
         }
       }
@@ -35371,9 +35371,9 @@ Check the render method of \`` + q + "`.");
             S_[b] = !0;
             var P = Dr;
             try {
-              En(_), d.mode & ni ? p("%s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node", a, a, b) : p("%s is deprecated in StrictMode. %s was passed an instance of %s which renders StrictMode children. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node", a, a, b);
+              Mn(_), d.mode & ni ? p("%s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node", a, a, b) : p("%s is deprecated in StrictMode. %s was passed an instance of %s which renders StrictMode children. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node", a, a, b);
             } finally {
-              P ? En(P) : Fi();
+              P ? Mn(P) : Fi();
             }
           }
         }
@@ -36751,7 +36751,7 @@ function gz(s) {
       })), f = C, h = !0, this;
     },
     render(v) {
-      return h || this.configure(), Pp.updateContainer(/* @__PURE__ */ Mn.jsx(yz, {
+      return h || this.configure(), Pp.updateContainer(/* @__PURE__ */ bn.jsx(yz, {
         store: o,
         children: v,
         onCreated: f,
@@ -36778,7 +36778,7 @@ function yz({
         active: !0
       }
     })), t && t(r), s.getState().events.connected || r.events.connect == null || r.events.connect(n);
-  }, []), /* @__PURE__ */ Mn.jsx(nM.Provider, {
+  }, []), /* @__PURE__ */ bn.jsx(nM.Provider, {
     value: s,
     children: e
   });
@@ -36799,7 +36799,7 @@ function gR(s, e) {
   }
 }
 function _z(s, e, t) {
-  return /* @__PURE__ */ Mn.jsx(xz, {
+  return /* @__PURE__ */ bn.jsx(xz, {
     children: s,
     container: e,
     state: t
@@ -36899,8 +36899,8 @@ function xz({
     v.setState((y) => p(c.getState(), y));
   }, [p]), qt.useEffect(() => () => {
     v.destroy();
-  }, []), /* @__PURE__ */ Mn.jsx(Mn.Fragment, {
-    children: Pp.createPortal(/* @__PURE__ */ Mn.jsx(nM.Provider, {
+  }, []), /* @__PURE__ */ bn.jsx(bn.Fragment, {
+    children: Pp.createPortal(/* @__PURE__ */ bn.jsx(nM.Provider, {
       value: v,
       children: e
     }), v, null)
@@ -37220,11 +37220,11 @@ const Iz = /* @__PURE__ */ qt.forwardRef(function({
           }
         }), I == null || I(J);
       }
-    }), ne.current.render(/* @__PURE__ */ Mn.jsx(W, {
-      children: /* @__PURE__ */ Mn.jsx(cR, {
+    }), ne.current.render(/* @__PURE__ */ bn.jsx(W, {
+      children: /* @__PURE__ */ bn.jsx(cR, {
         set: Me,
-        children: /* @__PURE__ */ Mn.jsx(qt.Suspense, {
-          fallback: /* @__PURE__ */ Mn.jsx(nz, {
+        children: /* @__PURE__ */ bn.jsx(qt.Suspense, {
+          fallback: /* @__PURE__ */ bn.jsx(nz, {
             set: he
           }),
           children: e ?? null
@@ -37237,7 +37237,7 @@ const Iz = /* @__PURE__ */ qt.forwardRef(function({
       return () => gR(re);
   }, []);
   const le = f ? "none" : "auto";
-  return /* @__PURE__ */ Mn.jsx("div", {
+  return /* @__PURE__ */ bn.jsx("div", {
     ref: ie,
     style: {
       position: "relative",
@@ -37248,13 +37248,13 @@ const Iz = /* @__PURE__ */ qt.forwardRef(function({
       ...r
     },
     ...z,
-    children: /* @__PURE__ */ Mn.jsx("div", {
+    children: /* @__PURE__ */ bn.jsx("div", {
       ref: O,
       style: {
         width: "100%",
         height: "100%"
       },
-      children: /* @__PURE__ */ Mn.jsx("canvas", {
+      children: /* @__PURE__ */ bn.jsx("canvas", {
         ref: Z,
         style: {
           display: "block"
@@ -37264,8 +37264,8 @@ const Iz = /* @__PURE__ */ qt.forwardRef(function({
     })
   });
 }), Fz = /* @__PURE__ */ qt.forwardRef(function(e, t) {
-  return /* @__PURE__ */ Mn.jsx(SR, {
-    children: /* @__PURE__ */ Mn.jsx(Iz, {
+  return /* @__PURE__ */ bn.jsx(SR, {
+    children: /* @__PURE__ */ bn.jsx(Iz, {
       ...e,
       ref: t
     })
@@ -38135,20 +38135,20 @@ function nB({
       s,
       0.1
     ));
-  }), /* @__PURE__ */ Mn.jsxs(Mn.Fragment, { children: [
+  }), /* @__PURE__ */ bn.jsxs(bn.Fragment, { children: [
     _z(
-      /* @__PURE__ */ Mn.jsxs("mesh", { children: [
-        /* @__PURE__ */ Mn.jsx("simulationMaterial", { ref: v, args: [o] }),
-        /* @__PURE__ */ Mn.jsxs("bufferGeometry", { children: [
-          /* @__PURE__ */ Mn.jsx("bufferAttribute", { attach: "attributes-position", count: T.length / 3, array: T, itemSize: 3 }),
-          /* @__PURE__ */ Mn.jsx("bufferAttribute", { attach: "attributes-uv", count: C.length / 2, array: C, itemSize: 2 })
+      /* @__PURE__ */ bn.jsxs("mesh", { children: [
+        /* @__PURE__ */ bn.jsx("simulationMaterial", { ref: v, args: [o] }),
+        /* @__PURE__ */ bn.jsxs("bufferGeometry", { children: [
+          /* @__PURE__ */ bn.jsx("bufferAttribute", { attach: "attributes-position", count: T.length / 3, array: T, itemSize: 3 }),
+          /* @__PURE__ */ bn.jsx("bufferAttribute", { attach: "attributes-uv", count: C.length / 2, array: C, itemSize: 2 })
         ] })
       ] }),
       x
     ),
-    /* @__PURE__ */ Mn.jsxs("points", { ...p, children: [
-      /* @__PURE__ */ Mn.jsx("bufferGeometry", { children: /* @__PURE__ */ Mn.jsx("bufferAttribute", { attach: "attributes-position", count: E.length / 3, array: E, itemSize: 3 }) }),
-      /* @__PURE__ */ Mn.jsx("depthOfFieldMaterial", { ref: y })
+    /* @__PURE__ */ bn.jsxs("points", { ...p, children: [
+      /* @__PURE__ */ bn.jsx("bufferGeometry", { children: /* @__PURE__ */ bn.jsx("bufferAttribute", { attach: "attributes-position", count: E.length / 3, array: E, itemSize: 3 }) }),
+      /* @__PURE__ */ bn.jsx("depthOfFieldMaterial", { ref: y })
     ] })
   ] });
 }
@@ -38172,8 +38172,8 @@ function iB({
     C.current && C.current.update && C.current.update(E);
   }), fc(() => {
     T.position.set(0, 0, y);
-  }, [y, T]), /* @__PURE__ */ Mn.jsxs(Mn.Fragment, { children: [
-    /* @__PURE__ */ Mn.jsx(
+  }, [y, T]), /* @__PURE__ */ bn.jsxs(bn.Fragment, { children: [
+    /* @__PURE__ */ bn.jsx(
       jz,
       {
         ref: C,
@@ -38188,8 +38188,8 @@ function iB({
         maxPolarAngle: f ? Math.PI : Math.PI / 2
       }
     ),
-    /* @__PURE__ */ Mn.jsx("ambientLight", {}),
-    /* @__PURE__ */ Mn.jsx(
+    /* @__PURE__ */ bn.jsx("ambientLight", {}),
+    /* @__PURE__ */ bn.jsx(
       nB,
       {
         frequency: s,
@@ -38207,33 +38207,31 @@ function iB({
   ] });
 }
 function uB({
-  width: s = "100%",
-  height: e = "100%",
-  backgroundColor: t = "#000000",
-  frequency: n = 0.15,
-  speedFactor: r = 4,
-  rotationSpeed: o = 0.3,
-  gradientColors: c = ["#F0F4FF", "#637AFF", "#372CD5", "#F0F4FF"],
-  gradientStops: f = [0.6, 0.65, 0.75, 0.8],
-  gradientRadius: h = 1.35,
-  autoRotate: p = !0,
-  enableVerticalRotation: v = !1,
-  blur: y = 24,
-  focus: x = 8.7,
-  fov: M = 35,
-  cameraZ: T = 7.6,
-  particles: C = 256,
-  ...w
+  backgroundColor: s = "#000000",
+  frequency: e = 0.15,
+  speedFactor: t = 4,
+  rotationSpeed: n = 0.3,
+  gradientColors: r = ["#F0F4FF", "#637AFF", "#372CD5", "#F0F4FF"],
+  gradientStops: o = [0.6, 0.65, 0.75, 0.8],
+  gradientRadius: c = 1.35,
+  autoRotate: f = !0,
+  enableVerticalRotation: h = !1,
+  blur: p = 24,
+  focus: v = 8.7,
+  fov: y = 35,
+  cameraZ: x = 7.6,
+  particles: M = 256
 }) {
-  return /* @__PURE__ */ Mn.jsx("div", { style: { width: s, height: e, backgroundColor: t }, ...w, children: /* @__PURE__ */ Mn.jsx(
+  return /* @__PURE__ */ bn.jsx(
     Fz,
     {
       camera: {
-        fov: M,
-        position: [0, 0, T]
+        fov: y,
+        position: [0, 0, x]
       },
       gl: {
-        alpha: !0,
+        alpha: !1,
+        //we're setting background so can say false
         antialias: !0,
         powerPreference: "high-performance",
         desynchronized: !0,
@@ -38245,27 +38243,34 @@ function uB({
       },
       resize: { scroll: !1 },
       dpr: [1, 2],
-      style: { background: t },
-      children: /* @__PURE__ */ Mn.jsx(
+      style: {
+        width: "100%",
+        height: "100%",
+        display: "block",
+        minWidth: "200px",
+        minHeight: "200px",
+        background: s
+      },
+      children: /* @__PURE__ */ bn.jsx(
         iB,
         {
-          frequency: n,
-          speedFactor: r,
-          rotationSpeed: o,
-          gradientColors: c,
-          gradientStops: f,
-          gradientRadius: h,
-          autoRotate: p,
-          enableVerticalRotation: v,
-          blur: y,
-          focus: x,
-          fov: M,
-          cameraZ: T,
-          particles: C
+          frequency: e,
+          speedFactor: t,
+          rotationSpeed: n,
+          gradientColors: r,
+          gradientStops: o,
+          gradientRadius: c,
+          autoRotate: f,
+          enableVerticalRotation: h,
+          blur: p,
+          focus: v,
+          fov: y,
+          cameraZ: x,
+          particles: M
         }
       )
     }
-  ) });
+  );
 }
 export {
   uB as default

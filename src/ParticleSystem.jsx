@@ -525,67 +525,77 @@ export default function ParticleSystem({
   cameraZ = 7.6,
   particles = 256,
 }) {
-  const containerRef = useRef(null)
-  const [size, setSize] = useState({ width: 0, height: 0 })
+  const ref = useRef(null)
 
   useEffect(() => {
-    if (!containerRef.current) return
+    // Only apply in Framer canvas (not in published webpage)
+    const isFramerCanvas = window.location.hostname.includes('framer')
+    if (!isFramerCanvas) return
 
-    const observer = new ResizeObserver(entries => {
-      for (let entry of entries) {
-        const { width, height } = entry.contentRect
-        setSize({ width, height })
+    const updateSize = () => {
+      if (ref.current) {
+        const parent = ref.current.parentElement
+        if (parent) {
+          const { width, height } = parent.getBoundingClientRect()
+          ref.current.style.width = `${width}px`
+          ref.current.style.height = `${height}px`
+        }
       }
-    })
-    observer.observe(containerRef.current)
-    return () => observer.disconnect()
+    }
+    updateSize()
+    window.addEventListener('resize', updateSize)
+    return () => window.removeEventListener('resize', updateSize)
   }, [])
 
-  // 👇 Force explicit pixel size so zoom doesn’t distort in Framer canvas
+
   return (
     <div
-      ref={containerRef}
-      style={{ width: "100%", height: "100%" }}
+      ref={ref}
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'block',
+        minWidth: '200px',
+        minHeight: '200px',
+      }}
     >
-      {size.width > 0 && size.height > 0 && (
-        <Canvas
-          camera={{ fov, position: [0, 0, cameraZ] }}
-          gl={{
-            alpha: false,
-            antialias: true,
-            powerPreference: "high-performance",
-            desynchronized: true,
-            premultipliedAlpha: false,
-            preserveDrawingBuffer: false,
-            failIfMajorPerformanceCaveat: false,
-            stencil: false,
-            depth: true,
-          }}
-          resize={{ scroll: false }}
-          dpr={[1, 2]}
+      <Canvas
+        camera={{ fov, position: [0, 0, cameraZ] }}
+        gl={{
+          alpha: false,
+          antialias: true,
+          powerPreference: "high-performance",
+          desynchronized: true,
+          premultipliedAlpha: false,
+          preserveDrawingBuffer: false,
+          failIfMajorPerformanceCaveat: false,
+          stencil: false,
+          depth: true,
+        }}
+        resize={{ scroll: false }}
+        dpr={[1, 2]}
 
-          style={{ background: backgroundColor }}
-          width={size.width}
-          height={size.height}
-        >
-          <App
-            backgroundColor={backgroundColor}
-            frequency={frequency}
-            speedFactor={speedFactor}
-            rotationSpeed={rotationSpeed}
-            gradientColors={gradientColors}
-            gradientStops={gradientStops}
-            gradientRadius={gradientRadius}
-            autoRotate={autoRotate}
-            enableVerticalRotation={enableVerticalRotation}
-            blur={blur}
-            focus={focus}
-            fov={fov}
-            cameraZ={cameraZ}
-            particles={particles}
-          />
-        </Canvas>
-      )}
+        style={{ background: backgroundColor }}
+        width={size.width}
+        height={size.height}
+      >
+        <App
+          backgroundColor={backgroundColor}
+          frequency={frequency}
+          speedFactor={speedFactor}
+          rotationSpeed={rotationSpeed}
+          gradientColors={gradientColors}
+          gradientStops={gradientStops}
+          gradientRadius={gradientRadius}
+          autoRotate={autoRotate}
+          enableVerticalRotation={enableVerticalRotation}
+          blur={blur}
+          focus={focus}
+          fov={fov}
+          cameraZ={cameraZ}
+          particles={particles}
+        />
+      </Canvas>
     </div>
   )
 }

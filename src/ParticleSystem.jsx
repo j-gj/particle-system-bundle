@@ -306,27 +306,27 @@ class DepthOfFieldMaterial extends THREE.ShaderMaterial {
 extend({ SimulationMaterial, DepthOfFieldMaterial })
 
 // Particles Component
-function Particles({ 
+function Particles({
   frequency = 0.15,
-  speedFactor = 4, 
-  fov = 35, 
-  blur = 24, 
+  speedFactor = 4,
+  fov = 35,
+  blur = 24,
   focus = 8.7,
   size = 256,
   gradientColors = ['#F0F4FF', '#637AFF', '#372CD5', '#F0F4FF'],
   gradientStops = [0.6, 0.65, 0.75, 0.8],
   gradientRadius = 1.35,
-  ...props 
+  ...props
 }) {
   const simRef = useRef()
   const renderRef = useRef()
-  
+
   // Set up FBO scene
   const [scene] = useState(() => new THREE.Scene())
   const [camera] = useState(() => new THREE.OrthographicCamera(-1, 1, 1, -1, 1 / Math.pow(2, 53), 1))
   const [positions] = useState(() => new Float32Array([-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0]))
   const [uvs] = useState(() => new Float32Array([0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0]))
-  
+
   const target = useFBO(size, size, {
     minFilter: THREE.NearestFilter,
     magFilter: THREE.NearestFilter,
@@ -334,45 +334,45 @@ function Particles({
     stencilBuffer: false,
     type: THREE.FloatType
   })
-  
+
   // Generate particle positions as UV coordinates
   const particles = useMemo(() => {
     const length = size * size
     const particles = new Float32Array(length * 3)
-    
+
     for (let i = 0; i < length; i++) {
       const i3 = i * 3
       particles[i3 + 0] = (i % size) / size
-      particles[i3 + 1] = Math.floor(i / size) / size  
+      particles[i3 + 1] = Math.floor(i / size) / size
       particles[i3 + 2] = 0
     }
 
     return particles
   }, [size])
-  
+
   // Convert gradient colors to uniform format
   const gradientData = useMemo(() => {
     const colors = gradientColors.map(color => {
       const rgb = hexToRgb(color);
       return [rgb.r, rgb.g, rgb.b];
     });
-    
+
     return {
       colors: new Float32Array(colors.flat()),
       stops: new Float32Array(gradientStops)
     };
   }, [gradientColors, gradientStops]);
-  
+
   // Update simulation every frame
   useFrame(({ gl, clock }) => {
     if (!simRef.current || !renderRef.current) return
-    
+
     // Render simulation to FBO
     gl.setRenderTarget(target)
     gl.clear()
     gl.render(scene, camera)
     gl.setRenderTarget(null)
-    
+
     // Update render material with type assertion
     const renderMaterial = renderRef.current
     if (renderMaterial && renderMaterial.uniforms) {
@@ -385,19 +385,19 @@ function Particles({
       renderMaterial.uniforms.uGradientRadius.value = gradientRadius
       renderMaterial.uniforms.uTime.value = clock.elapsedTime
     }
-    
+
     // Update simulation material with type assertion
     const simMaterial = simRef.current
     if (simMaterial && simMaterial.uniforms) {
       simMaterial.uniforms.uTime.value = clock.elapsedTime * speedFactor
       simMaterial.uniforms.uFrequency.value = THREE.MathUtils.lerp(
-        simMaterial.uniforms.uFrequency.value, 
-        frequency, 
+        simMaterial.uniforms.uFrequency.value,
+        frequency,
         0.1
       )
     }
   })
-  
+
   return (
     <>
       {/* Simulation mesh rendered to FBO */}
@@ -411,7 +411,7 @@ function Particles({
         </mesh>,
         scene
       )}
-      
+
       {/* Points using FBO texture for positions */}
       <points {...props}>
         <bufferGeometry>
@@ -448,18 +448,18 @@ function App({
     const color = new THREE.Color(backgroundColor);
     gl.setClearColor(color, 1);
   }, [gl, backgroundColor]);
-  
+
 
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
-    //   camera.aspect = window.innerWidth / window.innerHeight
-        camera.aspect = size.width / size.height
+      //   camera.aspect = window.innerWidth / window.innerHeight
+      camera.aspect = size.width / size.height
       camera.updateProjectionMatrix()
       //gl.setSize(window.innerWidth, window.innerHeight)
       gl.setSize(size.width, size.height)
       //let Canvas handle DPR
-    //   gl.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+      //   gl.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     }
     window.addEventListener('resize', handleResize)
     handleResize()
@@ -509,12 +509,6 @@ function App({
   )
 }
 
-/**
- * @framerSupportedLayoutWidth any
- * @framerSupportedLayoutHeight any
- * @framerIntrinsicWidth 200
- * @framerIntrinsicHeight 200
- */
 export default function ParticleSystem({
   backgroundColor = '#fff',
   frequency = 0.15,
@@ -531,53 +525,67 @@ export default function ParticleSystem({
   cameraZ = 7.6,
   particles = 256,
 }) {
+  const containerRef = useRef(null)
+  const [size, setSize] = useState({ width: 0, height: 0 })
+
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const observer = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        const { width, height } = entry.contentRect
+        setSize({ width, height })
+      }
+    })
+    observer.observe(containerRef.current)
+    return () => observer.disconnect()
+  }, [])
+
+  // 👇 Force explicit pixel size so zoom doesn’t distort in Framer canvas
   return (
-    <Canvas
-        camera={{
-          fov: fov,
-          position: [0, 0, cameraZ]
-        }}
-        gl={{
-          alpha: false, // Keep alpha false for slight performance benefit
-          antialias: true,
-          powerPreference: "high-performance",
-          desynchronized: true,
-          premultipliedAlpha: false,
-          preserveDrawingBuffer: false,
-          failIfMajorPerformanceCaveat: false,
-          stencil: false,
-          depth: true
-        }}
-        resize={{ scroll: false }}
-        dpr={[1, 2]}
-        style={{ 
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: '100%', 
-            height: '100%', 
-            display: 'block',
-            minWidth: '200px',
-            minHeight: '200px',
-            background: backgroundColor // Fallback for non-WebGL scenarios
-        }}
-      >
-        <App 
-          backgroundColor={backgroundColor} // Pass backgroundColor to App
-          frequency={frequency}
-          speedFactor={speedFactor}
-          rotationSpeed={rotationSpeed}
-          gradientColors={gradientColors}
-          gradientStops={gradientStops}
-          gradientRadius={gradientRadius}
-          autoRotate={autoRotate}
-          enableVerticalRotation={enableVerticalRotation}
-          blur={blur}
-          focus={focus}
-          fov={fov}
-          cameraZ={cameraZ}
-          particles={particles}
-        />
-      </Canvas>
+    <div
+      ref={containerRef}
+      style={{ width: "100%", height: "100%" }}
+    >
+      {size.width > 0 && size.height > 0 && (
+        <Canvas
+          camera={{ fov, position: [0, 0, cameraZ] }}
+          gl={{
+            alpha: false,
+            antialias: true,
+            powerPreference: "high-performance",
+            desynchronized: true,
+            premultipliedAlpha: false,
+            preserveDrawingBuffer: false,
+            failIfMajorPerformanceCaveat: false,
+            stencil: false,
+            depth: true,
+          }}
+          resize={{ scroll: false }}
+          dpr={[1, 2]}
+
+          style={{ background: backgroundColor }}
+          width={size.width}
+          height={size.height}
+        >
+          <App
+            backgroundColor={backgroundColor}
+            frequency={frequency}
+            speedFactor={speedFactor}
+            rotationSpeed={rotationSpeed}
+            gradientColors={gradientColors}
+            gradientStops={gradientStops}
+            gradientRadius={gradientRadius}
+            autoRotate={autoRotate}
+            enableVerticalRotation={enableVerticalRotation}
+            blur={blur}
+            focus={focus}
+            fov={fov}
+            cameraZ={cameraZ}
+            particles={particles}
+          />
+        </Canvas>
+      )}
+    </div>
   )
 }

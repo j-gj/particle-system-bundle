@@ -495,7 +495,7 @@ function App({
 
 // Main Export for CDN Usage
 export default function ParticleSystem({
-  backgroundColor = '#000000',
+  backgroundColor = '#637AFF',
   frequency = 0.15,
   speedFactor = 4,
   rotationSpeed = 0.3,

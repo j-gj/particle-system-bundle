@@ -38207,7 +38207,7 @@ function iB({
   ] });
 }
 function uB({
-  backgroundColor: s = "#000000",
+  backgroundColor: s = "#637AFF",
   frequency: e = 0.15,
   speedFactor: t = 4,
   rotationSpeed: n = 0.3,

@@ -38275,8 +38275,6 @@ function uB({
           resize: { scroll: !1 },
           dpr: [1, 2],
           style: { background: s },
-          width: size.width,
-          height: size.height,
           children: /* @__PURE__ */ Mn.jsx(
             iB,
             {

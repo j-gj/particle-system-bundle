@@ -576,8 +576,6 @@ export default function ParticleSystem({
         dpr={[1, 2]}
 
         style={{ background: backgroundColor }}
-        width={size.width}
-        height={size.height}
       >
         <App
           backgroundColor={backgroundColor}

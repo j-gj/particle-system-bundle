@@ -492,7 +492,12 @@ function App({
   )
 }
 
-// Main Export for CDN Usage
+/**
+ * @framerSupportedLayoutWidth auto
+ * @framerSupportedLayoutHeight auto
+ * @framerIntrinsicWidth 200
+ * @framerIntrinsicHeight 200
+ */
 export default function ParticleSystem({
   backgroundColor = '#fff',
   frequency = 0.15,

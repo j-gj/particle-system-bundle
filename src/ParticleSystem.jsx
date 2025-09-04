@@ -1,7 +1,19 @@
 import React, { useMemo, useState, useRef, useEffect } from 'react'
 import { Canvas, createPortal, useFrame, extend, useThree } from '@react-three/fiber'
 import { OrbitControls, useFBO } from '@react-three/drei'
-import * as THREE from 'three'
+// import * as THREE from 'three'
+import {
+  ShaderMaterial,
+  DataTexture,
+  RGBAFormat,
+  FloatType,
+  Scene,
+  OrthographicCamera,
+  NearestFilter,
+  Color,
+  MathUtils,
+  NormalBlending
+} from 'three'
 
 // Utility function
 function hexToRgb(hex) {
@@ -166,14 +178,14 @@ const classicNoise = `
 `
 
 // Simulation Material
-class SimulationMaterial extends THREE.ShaderMaterial {
+class SimulationMaterial extends ShaderMaterial {
   constructor(size = 512) {
-    const positionsTexture = new THREE.DataTexture(
+    const positionsTexture = new DataTexture(
       getRandomSphere(size * size, 1),
       size,
       size,
-      THREE.RGBAFormat,
-      THREE.FloatType
+      RGBAFormat,
+      FloatType
     )
     positionsTexture.needsUpdate = true
 
@@ -223,7 +235,7 @@ class SimulationMaterial extends THREE.ShaderMaterial {
 }
 
 // Depth of Field Material
-class DepthOfFieldMaterial extends THREE.ShaderMaterial {
+class DepthOfFieldMaterial extends ShaderMaterial {
   constructor() {
     super({
       uniforms: {
@@ -296,7 +308,7 @@ class DepthOfFieldMaterial extends THREE.ShaderMaterial {
         }
       `,
       transparent: true,
-      blending: THREE.NormalBlending,
+      blending: NormalBlending,
       depthWrite: false
     })
   }
@@ -322,17 +334,17 @@ function Particles({
   const renderRef = useRef()
 
   // Set up FBO scene
-  const [scene] = useState(() => new THREE.Scene())
-  const [camera] = useState(() => new THREE.OrthographicCamera(-1, 1, 1, -1, 1 / Math.pow(2, 53), 1))
+  const [scene] = useState(() => new Scene())
+  const [camera] = useState(() => new OrthographicCamera(-1, 1, 1, -1, 1 / Math.pow(2, 53), 1))
   const [positions] = useState(() => new Float32Array([-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0]))
   const [uvs] = useState(() => new Float32Array([0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0]))
 
   const target = useFBO(size, size, {
-    minFilter: THREE.NearestFilter,
-    magFilter: THREE.NearestFilter,
-    format: THREE.RGBAFormat,
+    minFilter: NearestFilter,
+    magFilter: NearestFilter,
+    format: RGBAFormat,
     stencilBuffer: false,
-    type: THREE.FloatType
+    type: FloatType
   })
 
   // Generate particle positions as UV coordinates
@@ -390,7 +402,7 @@ function Particles({
     const simMaterial = simRef.current
     if (simMaterial && simMaterial.uniforms) {
       simMaterial.uniforms.uTime.value = clock.elapsedTime * speedFactor
-      simMaterial.uniforms.uFrequency.value = THREE.MathUtils.lerp(
+      simMaterial.uniforms.uFrequency.value = MathUtils.lerp(
         simMaterial.uniforms.uFrequency.value,
         frequency,
         0.1
@@ -445,7 +457,7 @@ function App({
 
   // Set renderer clear color
   useEffect(() => {
-    const color = new THREE.Color(backgroundColor);
+    const color = new Color(backgroundColor);
     gl.setClearColor(color, 1);
   }, [gl, backgroundColor]);
 

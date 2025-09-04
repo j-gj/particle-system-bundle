@@ -16,8 +16,24 @@ export default defineConfig({
         globals: {
           react: 'React',
           'react-dom': 'ReactDOM'
-        }
+        },
+        manualChunks: undefined
+      },
+      treeshake: {
+        moduleSideEffects: false
       }
+    },
+    minify: true,
+    target: 'es2020'
+  },
+  resolve: {
+    alias: {
+      // Force three.js to use ES modules for better tree-shaking
+      'three': 'three/src/Three.js'
     }
+  },
+  define: {
+    // Remove development code
+    'process.env.NODE_ENV': '"production"'
   }
 })
